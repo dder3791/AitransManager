@@ -1,0 +1,529 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" 
+    "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.aiTrans.mapper.ProjectMapper">
+	<!--mybatis ehcache缓存配置 -->
+	<!-- 以下两个<cache>标签二选一,第一个可以输出日志,第二个不输出日志 <cache type="org.mybatis.caches.ehcache.LoggingEhcache"/> -->
+	<!-- <cache type="org.mybatis.caches.ehcache.EhcacheCache"/> -->
+	<!-- 以下与实体类的中字段一致 -->
+	
+	<sql id="coopperationProject">
+		projectD.id,
+		projectD.name AS p_name,
+		projectD.head AS p_head,
+		projectD.languagePair,
+		projectD.createTime,
+		projectD.completeTime,
+		projectD.cooperativeState,
+		projectD.description AS p_description,
+		customerD.nameZH,
+		customerD.address,
+		customerD.cel,
+		customerD.email,
+		customerD.description,
+		customerD.type,
+		customerD.isForeign,
+		customerD.head,
+		projectTypeD.projectType,
+		procedureTypeD.procedureType,
+	</sql>
+	
+	<sql id="groupByCooperationProject">
+		pname,
+		projectD.id,
+		projectD.name,
+		projectD.head,
+		projectD.languagePair,
+		projectD.createTime,
+		projectD.completeTime,
+		projectD.cooperativeState,
+		projectD.description,
+		customerD.nameZH,
+		customerD.address,
+		customerD.cel,
+		customerD.email,
+		customerD.description,
+		customerD.type,
+		customerD.isForeign,
+		customerD.head,
+		projectTypeD.projectType,
+		procedureTypeD.procedureType
+	</sql>
+	
+	<sql id="myProject">
+		projectD.id,
+		projectD.name,
+		projectD.head,
+		projectD.language,
+		projectStateD.id stateId,
+		projectStateD.stateName,
+		projectD.traStartTime,
+		projectD.traEndTime,
+		projectD.description
+	</sql>
+	
+	<sql id="selectId">
+		projectD.id,
+		projectD.name,
+		projectD.head,
+		projectD.language,
+		projectD.createTime,
+		projectD.completeTime,
+		projectD.description
+	</sql>
+	
+	<sql id="selectAll">
+		projectD.id,
+		projectD.name,
+		projectD.head,
+		projectD.language,
+		projectD.createTime,
+		projectD.completeTime,
+		projectD.cooperativeState,
+		projectD.description,
+		customerD.nameZH,
+		customerD.address,
+		customerD.cel,
+		customerD.tel,
+		customerD.email,
+		customerD.description,
+		customerD.type,
+		customerD.isForeign,
+		customerD.head,
+		projectTypeD.projectType,
+		procedureTypeD.procedureType
+	</sql>
+<!-- 	<sql id="selectId">
+		projectD.id,
+		projectD.name,
+		projectD.company,
+		projectD.address,
+		projectD.head,
+		projectD.phone,
+		projectD.email,
+		projectD.createTime,
+		projectD.completeTime,
+		projectD.description
+	</sql> -->
+	
+	
+	<!-- 通过公司案号reference 查找项目id-->
+	<select id="findByreference" parameterType="com.aiTrans.entity.ProjectFormMap" resultType="com.aiTrans.entity.ProjectFormMap">
+		select id from projectD where reference=#{reference}
+	</select>
+	
+	<!-- 通过客户案号customerreference 查找项目id-->
+	<select id="findBycustomerReference" parameterType="com.aiTrans.entity.ProjectFormMap" resultType="com.aiTrans.entity.ProjectFormMap">
+		select id from projectD where customerReference=#{customerreference}
+	</select>
+	
+	
+	<!-- 通过项目id查看项目详情  -->
+	<select id="lookProject" parameterType="int" resultType="com.aiTrans.entity.ProjectFormMap">
+		SELECT
+	projectD.id,
+	projectD.head,
+	projectD.languagePair,
+	projectD.language,
+	projectD.createTime,
+	projectD.completeTime,
+	projectD.cooperativeState,
+	projectD.description,
+	projectD.customerReference,
+	projectD.reference,
+	projectD.projectStateId,
+	projectStateD.stateName,
+	projectD.advance,
+  	projectD.name,
+  	projectD.fileURL,
+	customerD.nameZH cname,
+	projectTypeD.projectType,
+	procedureTypeD.procedureType,
+	(select domainD.name from domainD where domainId=domainD.id) dname,
+	pname,
+	tname = STUFF(
+		(
+			SELECT
+				',' + tname
+			FROM
+				PRO_TRA TA
+			WHERE
+				TA.pname = TB.pname FOR XML PATH ('')
+		),
+		1,
+		1,
+		''
+	),
+	vname = STUFF(
+		(
+			SELECT
+				',' + vname
+			FROM
+				PRO_VER VA
+			WHERE
+				VA.pvname = VB.pvname FOR XML PATH ('')
+		),
+		1,
+		1,
+		''
+	),
+	aname = STUFF(
+		(
+			SELECT
+				',' + aname
+			FROM
+				PRO_AUD DA
+			WHERE
+				DA.paname = DB.paname FOR XML PATH ('')
+		),
+		1,
+		1,
+		''
+	)
+FROM
+	PRO_TRA TB,
+	PRO_VER VB,
+	PRO_AUD DB,
+	projectD,
+	customerD,
+	projectTypeD,
+	procedureTypeD,
+	projectStateD
+WHERE
+projectD.id =#{id}
+AND projectD.procedureTypeId = procedureTypeD.id
+AND projectD.projectTypeId = projectTypeD.id
+AND projectD.projectStateId=projectStateD.id
+AND projectD.customerId = customerD.id
+AND pvname=projectD.name
+AND pvname = pname
+AND paname = pname
+GROUP BY
+	projectD.id,
+	projectD.head,
+	projectD.languagePair,
+	projectD.language,
+	projectD.createTime,
+	projectD.completeTime,
+	projectD.cooperativeState,
+	projectD.description,
+	projectD.customerReference,
+	projectD.reference,
+	projectD.advance,
+	projectD.projectStateId,
+	projectD.name,
+	customerD.nameZH,
+	projectTypeD.projectType,
+	procedureTypeD.procedureType,
+	projectStateD.stateName,
+	projectD.fileURL,
+	pname,
+	paname,
+	pvname,
+	projectD.domainId
+		 
+	</select>
+	
+	
+	
+	<!-- 通过名字查找，完成模糊查询 -->
+	<select id="findByName" resultType="com.aiTrans.entity.ProjectFormMap">
+		select * from projectD where name like '%${name}%';
+	</select>
+	
+	
+	<select id="findProjectflowPage" resultType="com.aiTrans.entity.ProjectFormMap">
+			
+		SELECT
+			projectD.id,
+			projectD.head,
+			projectD.languagePair,
+			projectD.completeTime,
+			projectD.description,
+			projectD.createTime,
+			customerD.nameZH cname,
+			projectTypeD.projectType,
+			procedureTypeD.procedureType,
+			projectStateD.stateName,
+			projectD.projectStateId,
+			pname,tname = STUFF((SELECT	',' + tname	FROM PRO_TRA A	WHERE
+			A.pname = B.pname FOR XML PATH ('')),1,1,''	),
+			vname = STUFF((SELECT	',' + VA.vname	FROM PRO_VER VA	WHERE
+			VA.pvname = VB.pvname FOR XML PATH ('')),1,1,''	),
+			aname = STUFF((SELECT	',' + AA.aname	FROM PRO_AUD AA	WHERE
+			AA.paname = AB.paname FOR XML PATH ('')),1,1,''	)
+		FROM
+			PRO_TRA B,
+			PRO_VER VB,
+			PRO_AUD AB,
+			projectD,
+			customerD,
+			projectTypeD,
+			procedureTypeD,
+			projectStateD
+		WHERE
+			projectD.customerId = customerD.id
+		AND projectD.procedureTypeId = procedureTypeD.id
+		AND projectD.projectTypeId = projectTypeD.id
+		AND projectD.projectStateId >2
+		AND 14>projectD.projectStateId 
+		AND projectD.name = B.pname
+		AND projectD.name = AB.paname
+		AND projectD.name = VB.pvname
+		and projectD.projectStateId=projectStateD.id
+		 <if test="name != null and name != ''">
+		 	and projectD.name like '%${name}%'
+		 </if>
+		  <if test="languagePair != null and languagePair != ''">
+		 	and projectD.languagePair like '%${languagePair}%'
+		 </if>
+		  <if test="projectState != null and projectState != ''">
+		 	and projectStateD.stateName like '%${projectState}%'
+		 </if>
+		 <if test="processesTypeId != null and processesTypeId != ''">
+		 	and procedureTypeD.procedureType like '%${processesTypeId}%'
+		 </if>
+		 <if test="cname!= null and cname != ''">
+		 	and customerD.nameZH like '%${cname}%'
+		 </if>
+		 <if test="tname!= null and tname != ''">
+		 	and tname like '%${tname}%'
+		 </if>
+		 <if test="projectType!= null and projectType != ''">
+		 	and projectTypeD.projectType like '%${projectType}%'
+		 </if>
+		 <if test="createTime!= null and createTime != ''">
+		 	and projectD.createTime>'${createTime}'
+		 </if>
+		 <if test="completeTime!= null and completeTime != ''">
+		 	and  '${completeTime}'>projectD.completeTime
+		 </if>
+		 <if test="head!= null and head != ''">
+		 	and projectD.head like '%${head}%'
+		 </if>
+		 
+		group by
+		projectD.id,
+		projectD.head,
+		projectD.languagePair,
+		projectD.completeTime,
+		projectD.createTime,
+		projectD.projectStateId,
+		projectD.description,
+		customerD.nameZH,
+		projectTypeD.projectType,
+		procedureTypeD.procedureType,
+		projectStateD.stateName,
+		pname,
+		AB.paname,
+		VB.pvname
+		
+		<if test="column != null">
+          order by ${column} ${sort}
+        </if>
+	</select>
+	
+	<!-- <select id="findCustomerProjectPage" resultType="com.aiTrans.entity.ProjectFormMap">
+		select
+		<include refid="selectId" />
+		from projectD
+		where id in (select MIN(id) from projectD group by projectD.company)
+		<if test="account != null and account != ''">
+		and account like '%${account}%'
+		</if>
+		<if test="column != null">
+          order by ${column} ${sort}
+        </if>
+	</select> -->
+	<!-- 通过客户id查看客户项目 -->
+	<!-- <select id="findProjectById" parameterType="String" resultType="com.aiTrans.entity.ProjectFormMap">
+		select
+		<include refid="selectId" />
+		from ly_project
+		where id=#{id} 
+		
+	</select> -->
+	
+	<!-- 接受项目 -->
+	<update id="accept">
+		update projectD set projectStateId=4, traStartTime=getDate() where id=#{projectId}
+	</update>
+	<!-- 完成项目 -->
+	<update id="complete">
+		update projectD set projectStateId=5, traEndTime=getDate() where id=#{projectId}
+	</update>
+	
+	<!-- 查看我的项目 -->
+	<select id="findMyProjectPage" resultType="com.aiTrans.entity.ProjectFormMap">
+		select 
+		<include refid="myProject" />
+		from projectD inner join projectStateD
+		on projectStateId=projectStateD.id 
+		and projectD.id in
+		(SELECT projectId from tra_projectD WHERE translatorId='${id}')
+	</select>
+	
+	
+	
+	
+	<!-- 通过id(customerId,processesTypeId,projectTypeId)查看项目 -->
+	<select id="findProjectById" resultType="com.aiTrans.entity.ProjectFormMap">
+		select
+		<include refid="selectId" />
+		from projectD inner join ${table}
+		on ${table}.id=${fk} and ${table}.id=${id} 
+		where 1=1
+		<if test="name != null and name!=''">
+		and projectD.name like '%${name}%'
+		</if>
+		<if test="head != null and head!=''">
+		and projectD.head like '%${head}%'
+		</if>
+	</select>
+<!-- 	<select id="findProjectById" resultType="com.aiTrans.entity.ProjectFormMap">
+		select
+		<include refid="selectId" />
+		from projectD inner join ${table}
+		on ${table}.id=${fk} and ${table}.id=#{id} 
+	</select> -->
+	
+	<select id="findProjectTypePage" resultType="com.aiTrans.entity.ProjectFormMap">
+		select
+		id,projectType,description
+		from projectTypeD
+		where 1 = 1
+		<if test="account != null and account != ''">
+		and account like '%${account}%'
+		</if>
+		<if test="projectType !=null and projectType !=''">
+		and projectType like '%${projectType}%'
+		</if>
+		<if test="column != null">
+          order by ${column} ${sort}
+        </if>
+	</select>
+	
+	<select id="findProcessesTypePage" resultType="com.aiTrans.entity.ProcedureTypeFormMap">
+		select
+		id,procedureType,description
+		from procedureTypeD
+		where 1 = 1 
+		<if test="procedureType != null and procedureType != ''">
+		and procedureType like '%${procedureType}%'
+		</if>
+		<if test="column != null">
+          order by ${column} ${sort}
+        </if>
+	</select>
+	
+	<select id="findAll" resultType="java.util.Map">
+		SELECT TOP 1 
+		<include refid="selectAll"/>
+		FROM projectD,customerD,projectTypeD,procedureTypeD 
+		WHERE projectD.id=#{projectId} 
+		AND customerId=customerD.id 
+		AND customerId=#{customerId} 
+		AND projectTypeId=projectTypeD.id 
+		AND projectTypeId=#{projectTypeId} 
+		AND procedureTypeId=procedureTypeD.id 
+		AND procedureTypeId=#{processesTypeId}
+	</select>
+	
+	<insert id="addCustomerProject">
+		insert into projectD(name,head,language,description,cooperativeState,createTime,
+		completeTime,processesTypeId,projectTypeId,transferId,customerId) values
+		('${name}','${head}','${language}','${description}','${cooperativeState}','${createTime}',
+		'${completeTime}','${processesTypeId}','${projectTypeId}','${transferId}','${customerId}')
+	</insert>
+	
+	<!-- 查看客户的协同项目 -->
+	<select id="findCustomerProjectPage" resultType="com.aiTrans.entity.ProjectFormMap">
+		select  
+			<include refid="coopperationProject"/>
+			tname=stuff(
+			(select ','+tname from PRO_TRA A 
+			where A.pname=B.pname 
+			FOR XML PATH('')),1,1,'')
+		FROM projectD,customerD,projectTypeD,procedureTypeD,PRO_TRA B 
+		WHERE customerId=customerD.id 
+		AND projectTypeId=projectTypeD.id  
+		AND procedureTypeId=procedureTypeD.id 
+		AND cooperativeState=1
+		AND projectD.name=pname
+		GROUP BY 
+			<include refid="groupByCooperationProject"/>
+		
+		
+		<!-- select
+		<include refid="selectId" />
+		from projectD
+		where cooperativeState=1 -->
+	</select>
+	
+	<select id="findProjectCountByCustomerId" parameterType="string" resultType="int">
+		select count(*) from projectD where customerId=#{id}
+	</select>
+
+	<select id="findProjectVerifyPage" parameterType="com.aiTrans.entity.ProjectFormMap" resultType="com.aiTrans.entity.ProjectFormMap">
+		SELECT
+			projectD.id,
+			projectD.head,
+			projectD.languagePair,
+			projectD.completeTime,
+			projectD.description,
+			projectD.createTime,
+			customerD.nameZH cname,
+			projectTypeD.projectType,
+			procedureTypeD.procedureType,
+			projectStateD.stateName,
+			projectD.projectStateId,
+			projectD.name pname
+			<!-- pname,tname = STUFF((SELECT	',' + tname	FROM PRO_TRA A	WHERE
+			A.pname = B.pname FOR XML PATH ('')),1,1,''	) -->
+		FROM
+			<!-- PRO_TRA B, -->
+			projectD,
+			customerD,
+			projectTypeD,
+			procedureTypeD,
+			projectStateD
+		WHERE
+			projectD.customerId = customerD.id
+		AND projectD.procedureTypeId = procedureTypeD.id
+		AND projectD.projectTypeId = projectTypeD.id
+		<!-- AND projectD.name = B.pname -->
+		and projectD.projectStateId=projectStateD.id
+		<if test="projectStateId != null and projectStateId != ''">
+		 	and projectD.projectStateId ='${projectStateId}'
+		 </if>
+		 
+		 <if test="projectStateId2 != null and projectStateId2 != '' and projectStateId1 != null and projectStateId1 != ''">
+		 	and (projectD.projectStateId ='${projectStateId2}' or '${projectStateId1}'=projectD.projectStateId )
+		 </if>		 
+		 <if test="name != null and name != ''">
+		 	and projectD.name like '%${name}%'
+		 </if>
+		  <if test="language != null and language != ''">
+		 	and projectD.languagePair like '%${language}%'
+		 </if>
+		  <if test="projectState != null and projectState != ''">
+		 	and projectStateD.stateName like '%${projectState}%'
+		 </if>
+		 <if test="processesTypeId != null and processesTypeId != ''">
+		 	and procedureTypeD.procedureType like '%${processesTypeId}%'
+		 </if>
+		group by
+		projectD.id,
+		projectD.head,
+		projectD.languagePair,
+		projectD.completeTime,
+		projectD.createTime,
+		projectD.projectStateId,
+		projectD.description,
+		customerD.nameZH,
+		projectTypeD.projectType,
+		procedureTypeD.procedureType,
+		projectStateD.stateName,
+		projectD.name
+	</select>
+</mapper>

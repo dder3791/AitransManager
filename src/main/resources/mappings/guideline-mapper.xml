@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" 
+    "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+    
+<mapper namespace="com.aiTrans.mapper.GuidelineMapper">
+
+	<sql id="findGuidelineByPage">
+		guidelineD.id,
+		guidelineD.flowName,
+		guidelineD.url
+		
+	</sql>
+	<!-- 查找喜讯信息 -->
+	<select id="findGuidelinByPage" parameterType="com.aiTrans.entity.GuidelineFormMap" resultType="com.aiTrans.entity.GuidelineFormMap">
+		select 
+		<include refid="findGuidelineByPage" />
+		from guidelineD where 1=1
+		<if test="flowName!=null and flowName!='' ">
+			and guidelineD.flowName like '%${flowName}%'
+		</if>
+		<if test="url!=null and url!='' ">
+			and guidelineD.url like '%${answer}%'
+		</if>
+	</select>
+</mapper>

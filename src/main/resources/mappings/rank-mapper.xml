@@ -1,0 +1,89 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" 
+    "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.aiTrans.mapper.RankMapper">
+	
+	<select id="findFirstPage" resultType="com.aiTrans.entity.TranslatorFormMap" parameterType="com.aiTrans.entity.TranslatorFormMap">
+	 SELECT	
+      tra_projectD.translatorId,
+      translatorD.nickname as tname,
+      translatorD.language,
+      translatorD.level,
+	  count(*) as total,
+       translatorD.point,
+	  SUM (length) as lengths
+	  FROM
+		tra_projectD,
+		translatorD,
+		rewardsD,
+		projectD
+	  WHERE
+		tra_projectD.translatorId = translatorD.id
+		and rewardsD.id=tra_projectD.projectId
+		and tra_projectD.projectId=projectD.id
+		and projectD.projectStateId='5'
+		<if test="tname != null and tname != ''">
+		 and tname like '%${tname}%'
+		</if>
+		<if test="level != null and level != ''">
+		 and level like '%${level}%'
+		</if>
+		<if test="points != null and points != ''">
+		 and points like '%${points}%'
+		</if>
+		<if test="lengths != null and lengths != ''">
+		 and lengths like '%${lengths}%'
+		</if>
+	  GROUP BY
+	    tra_projectD.translatorId,
+        translatorD.nickname,
+        translatorD.language,
+        translatorD.level,
+         translatorD.point
+		<if test="column != null">
+          order by ${column} ${sort}
+        </if>
+	</select>
+	
+	<select id="rankCount" parameterType="int" resultType="com.aiTrans.entity.TranslatorFormMap">
+		 SELECT	
+      tra_projectD.translatorId,
+      
+    SUM (length)/10  points
+FROM
+		tra_projectD,
+		translatorD,
+		rewardsD,projectD
+	  WHERE
+		tra_projectD.translatorId = translatorD.id
+		and rewardsD.id=tra_projectD.projectId
+		and tra_projectD.projectId=projectD.id
+		and projectD.projectStateId=#{projectStateId}
+ GROUP BY
+	    tra_projectD.translatorId,
+        translatorD.nickname,
+        translatorD.language,
+        translatorD.level
+	</select>
+	
+	<select id="findEvaluateD" parameterType="int" resultType="int">
+	 select count(translatorId) as count from evaluateD where translatorId=#{translatorId}
+	</select>
+	
+	<select id="findScore" parameterType="com.aiTrans.entity.RankFormMap" resultType="int">
+	 SELECT
+	COUNT(*) as counts
+FROM
+	evaluateD
+where 
+   translatorId=#{translatorId}
+  <if test="score!=null and score!=''">
+  and #{score}>=evaluateD.score
+  </if>
+  <if test="score!=null and score!=''">
+  and evaluateD.score>=#{scores}
+  </if>
+	</select>
+	
+ 
+</mapper>

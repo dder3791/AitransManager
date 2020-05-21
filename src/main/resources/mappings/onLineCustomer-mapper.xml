@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" 
+    "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.aiTrans.mapper.OnLineCustomerMapper">
+	<select id="findCompanyByPage" resultType="com.aiTrans.entity.OnLineCustomerFormMap" parameterType="com.aiTrans.entity.OnLineCustomerFormMap">
+		select
+		onLineCustomerD.* ,clientUserD.emaile,clientUserD.certificationState
+		from onLineCustomerD ,clientUserD where onLineCustomerD.clientUserId=clientUserD.id and 
+		certificationType=1
+		<if test="nameZH!=null and nameZH!=''">
+		and onLineCustomerD.nameZH like '%${nameZH}%'
+		</if>
+		<if test="nameEN!=null and nameEN!=''">
+		and onLineCustomerD.nameEN like '%${nameEN}%'
+		</if>
+		<if test="tel!=null and tel!=''">
+		and onLineCustomerD.tel like '%${tel}%'
+		</if>
+		<if test="emaile!=null and emaile!=''">
+		and clientUserD.emaile like '%${emaile}%'
+		</if>
+		<if test="column != null">
+		order by ${column} ${sort}
+		</if>
+		
+		
+	</select>
+	
+	
+	<!-- <update id="editAppealState" parameterType="com.aiTrans.entity.AppealClientFormMap">
+		update appealClientD set appealstate=#{appealstate} where id=#{id}
+	</update> -->
+</mapper>

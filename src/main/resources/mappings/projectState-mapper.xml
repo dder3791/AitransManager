@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" 
+    "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.aiTrans.mapper.ProjectStateMapper">
+	<sql id="findprojectStateByPage">projectStateD.id, projectStateD.stateName,
+		projectStateD.description</sql>
+	<select id="findprojectStateByPage" parameterType="com.aiTrans.entity.ProjectStateFormMap"
+		resultType="com.aiTrans.entity.ProjectStateFormMap">
+		select
+		<include refid="findprojectStateByPage" />
+		from projectStateD where 1=1
+		<if test="stateName!=null and stateName!=''">and projectStateD.stateName like '%${stateName}%'</if>
+		<if test="description!=null and description!=''">and projectStateD.description like '%${description}%'</if>
+		<if test="column != null">order by ${column} ${sort}</if>
+	</select>
+</mapper>

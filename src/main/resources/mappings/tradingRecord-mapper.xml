@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" 
+    "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.aiTrans.mapper.TradingRecordMapper">
+	 
+	<select id="findTradingRecordflowPage" parameterType="com.aiTrans.entity.TradingRecordFormMap"  resultType="com.aiTrans.entity.TradingRecordFormMap">
+		select tradingRecordD.* 
+		<!-- <if test="type!=null and type!=''">
+			<choose>
+				<when test="type==user">,clientUserD.userName as payee</when>
+				<when test="type==trans">,translatorD.accountName as payee</when>
+			</choose>
+		</if>  -->
+		from tradingRecordD
+		where 1=1 
+		<if test="payee!=null and payee!=''">
+			and payee like '%${payee}%'
+		</if>
+		<if test="payer!=null and payer!=''">
+			and payer like '%${payer}%'
+		</if>
+		<if test="payTime!=null and payTime!=''">
+			and payTime like '%${payTime}%'
+		</if>
+		<!-- <if test="type!=null and type!=''">
+			<choose>
+				<when test="type==user">,clientUserD where (clientUserD.id=trdingRecordD.payee or clientUserD.id=trdingRecordD.payer</when>
+				<when test="type==trans">,translatorD where (translatorD.id=trdingRecordD.payee or translatorD.id=trdingRecordD.payer</when>
+			</choose>
+		</if>  -->
+	</select>
+</mapper>

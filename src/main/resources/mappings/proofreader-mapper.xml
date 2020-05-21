@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" 
+    "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.aiTrans.mapper.ProofreaderMapper">
+<!-- 根据语种查询id name -->
+
+<select id="findIdandName" parameterType="com.aiTrans.entity.ProofreaderFormMap" resultType="com.aiTrans.entity.ProofreaderFormMap">
+	select id,nickname from proofreaderD where 1=1
+	<if test="language!=null and language!=''">
+	 and language='${language}' and domain like '%${domain}%'
+	</if>
+</select>
+
+<select id="findById" parameterType="com.aiTrans.entity.ProjectFormMap" resultType="com.aiTrans.entity.ProofreaderFormMap">
+	select nickname from proofreaderD where 1=1
+	<if test="verifierId !=null and verifierId !=''">
+	AND id='${verifierId}'
+	</if>
+</select>
+</mapper>

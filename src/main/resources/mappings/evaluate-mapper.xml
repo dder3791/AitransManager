@@ -1,0 +1,120 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" 
+    "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.aiTrans.mapper.EvaluateMapper">
+	 
+	 <sql id="findEvaluate">
+	 evaluateD.id,
+     evaluateD.reference,
+     evaluateD.difficultyT,
+     evaluateD.difficultyL,
+     evaluateD.comingDate,
+     evaluateD.completeDate,
+     evaluateD.problems,
+     evaluateD.score,
+     evaluateD.checker,
+     evaluateD.oriLanguage,
+     evaluateD.checkDate,
+     evaluateD.proofreaderId,
+     projectD.name,
+	translatorD.nickname tname,
+	tra_projectD.projectId,
+	tra_projectD.translatorId,
+	proofreaderD.nickname pname 
+	</sql>
+	
+	<select id="findFirstPage" resultType="com.aiTrans.entity.EvaluateFormMap" parameterType="com.aiTrans.entity.EvaluateFormMap">
+	SELECT
+  evaluateD.id,
+  evaluateD.reference,
+  evaluateD.difficultyT,
+  evaluateD.difficultyL,
+  evaluateD.comingDate,
+  evaluateD.completeDate,
+  evaluateD.problems,
+  evaluateD.score,
+  evaluateD.checker,
+  evaluateD.oriLanguage,
+  evaluateD.checkDate,
+  evaluateD.proofreaderId,
+	projectD.name,
+	translatorD.nickname tname,
+	tra_projectD.projectId,
+	tra_projectD.translatorId,
+	proofreaderD.nickname pname 
+FROM
+    evaluateD,
+	tra_projectD,
+	translatorD,
+	projectD,
+	proofreaderD
+WHERE 
+  proofreaderD.id=evaluateD.proofreaderId and
+  projectD.id=tra_projectD.projectId and 
+  translatorD.id=tra_projectD.translatorId and
+  evaluateD.translatorId = tra_projectD.translatorId
+AND evaluateD.projectId = tra_projectD.projectId
+<if test="reference!=null || reference!=''">
+    	and evaluateD.reference like '%${reference}%'
+</if>
+<if test="score != null and score != ''">
+	   and evaluateD.score like '%${score}%'
+</if>
+<if test="problems != null and problems != ''">
+	  and evaluateD.problems like '%${problems}%'
+</if>
+GROUP BY
+  evaluateD.id,
+  evaluateD.reference,
+  evaluateD.difficultyT,
+  evaluateD.difficultyL,
+  evaluateD.comingDate,
+  evaluateD.completeDate,
+  evaluateD.problems,
+  evaluateD.score,
+  evaluateD.checker,
+   evaluateD.oriLanguage,
+  evaluateD.checkDate,
+	evaluateD.proofreaderId,
+	projectD.name,
+	translatorD.nickname,
+	tra_projectD.projectId,
+	tra_projectD.translatorId,
+	proofreaderD.nickname
+	<if test="column != null">
+     order by ${column} ${sort}
+    </if>
+	</select> 
+	
+	<!-- 查询校对员信息 -->
+	<select id="findProofreadLanguage" parameterType="com.aiTrans.entity.EvaluateFormMap" resultType="com.aiTrans.entity.ProofreaderFormMap">
+	select proofreaderD.*from proofreaderD where language='${oriLanguage}'
+    </select>
+	
+	<!-- 查看我的评价 -->
+	<select id="findMyEvaluatePage"  resultType="com.aiTrans.entity.EvaluateFormMap" parameterType="com.aiTrans.entity.EvaluateFormMap">
+	 SELECT
+    <include refid="findEvaluate" />
+FROM
+    evaluateD,
+	tra_projectD,
+	translatorD,
+	projectD,
+	proofreaderD
+WHERE 
+  proofreaderD.id=evaluateD.proofreaderId and
+  projectD.id=tra_projectD.projectId and 
+  translatorD.id=tra_projectD.translatorId and
+  evaluateD.translatorId = tra_projectD.translatorId
+AND evaluateD.projectId = tra_projectD.projectId
+and tra_projectD.translatorId=${translatorId}
+	<if test="column != null">
+     order by ${column} ${sort}
+    </if>
+	</select>
+	
+	<!-- 根据译员id AND 项目id 查询评价数 -->
+	<select id="appealCount"  resultType="int"  parameterType="com.aiTrans.entity.EvaluateFormMap">
+	select COUNT(*) from appealD where translatorId=#{translatorId} and projectId=#{projectId} 
+	</select>
+</mapper>

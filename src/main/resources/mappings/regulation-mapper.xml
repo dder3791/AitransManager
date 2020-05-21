@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" 
+    "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.aiTrans.mapper.RegulationMapper">
+
+<!-- 以下与实体类的中字段一致 -->
+	<sql id="selectId">
+	    id,
+		rname,
+		explain,
+		state
+	</sql>
+	<!-- 查看积分规则 -->
+	<select id="findFirstPage" resultType="com.aiTrans.entity.RegulationFormMap" parameterType="com.aiTrans.entity.RegulationFormMap">
+	      select 
+	    <include refid="selectId"/> 
+	      from  regulationD
+	      WHERE 1=1
+		<if test="rname != null and rname != ''">
+		and rname like '%${rname}%'
+		</if>
+		<if test="column != null">
+          order by ${column} ${sort}
+        </if>
+	</select>
+</mapper>

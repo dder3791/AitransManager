@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" 
+    "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.aiTrans.mapper.AppealMapper">
+	 
+	
+	<select id="findFirstPage" resultType="com.aiTrans.entity.AppealFormMap" parameterType="com.aiTrans.entity.AppealFormMap">
+	SELECT
+  appealD.id,	
+  appealD.mode,
+  appealD.matter,
+  appealD.cause,
+  appealD.state,
+  appealD.appealDate,
+  appealD.translatorId,
+  appealD.projectId,
+  translatorD.nickname as tname,
+  projectD.name as pname
+FROM
+	appealD,
+  translatorD,
+  projectD
+WHERE 
+  appealD.translatorId=translatorD.id AND
+  appealD.projectId=projectD.id
+  <if test="matter != null and matter != ''">
+		and matter like '%${matter}%'
+  </if>
+  <if test="mode != null and mode != ''">
+	    and mode like '%${mode}%'
+  </if>
+  <if test="cause != null and cause != ''">
+		and cause like '%${cause}%'
+  </if>
+	<if test="column != null">
+     order by ${column} ${sort}
+    </if>
+	</select> 
+	
+ 
+	
+	
+	
+	
+</mapper>

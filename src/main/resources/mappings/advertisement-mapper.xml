@@ -1,0 +1,75 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" 
+    "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.aiTrans.mapper.AdvertisementMapper">
+	
+	<select id="findAdvertiIndexPage" resultType="com.aiTrans.entity.AdvertisementFormMap" parameterType="com.aiTrans.entity.AdvertisementFormMap">
+		select
+		clientUserShowD.*
+		FROM clientUserShowD
+		where 1=1
+		<if test="type!=null and type!=''">
+		and type like '%${type}%'
+		</if>
+		<if test="isUserful!=null and isUserful!=''">
+			and isUserful like '%${isUserful}%'
+		</if>
+		<if test="column != null">
+		order by ${column} ${sort}
+		</if>
+	</select>
+	
+	<select id="findPicadvertisePage" resultType="com.aiTrans.entity.PicAdvertiseFormMap" parameterType="com.aiTrans.entity.PicAdvertiseFormMap">
+		select
+		picAdvertiseD.*
+		FROM picAdvertiseD
+		where 1=1
+		<if test="type!=null and type!=''">
+		and type like '%${type}%'
+		</if>
+		<if test="isUseful!=null and isUseful!=''">
+			and isUseful like '%${isUseful}%'
+		</if>
+		<if test="coord!=null and coord!=''">
+			and coord like '%${coord}%'
+		</if>
+		<if test="column != null">
+		order by ${column} ${sort}
+		</if>
+	</select>
+	
+	<select id="findAdverListFormMapPage" resultType="com.aiTrans.entity.AdvertiseListFormMap" parameterType="com.aiTrans.entity.AdvertiseListFormMap">
+		select
+		advertiseListD.*
+		FROM advertiseListD
+		where 1=1
+		<if test="type!=null and type!=''">
+		and type like '%${type}%'
+		</if>
+		<if test="isuseful!=null and isuseful!=''">
+			and isuseful like '%${isuseful}%'
+		</if>
+		<if test="nameEN!=null and nameEN!=''">
+			and nameEN like '%${nameEN}%'
+		</if>
+		<if test="nameCH!=null and nameCH!=''">
+			and nameCH like '%${nameCH}%'
+		</if>
+		<if test="countryCH!=null and countryCH!=''">
+			and countryCH like '%${countryCH}%'
+		</if>
+		<if test="countryEN!=null and countryEN!=''">
+			and countryEN like '%${countryEN}%'
+		</if>
+		<if test="introEN!=null and introEN!=''">
+			and introEN like '%${introEN}%'
+		</if>
+		<if test="introCH!=null and introCH!=''">
+			and introCH like '%${introCH}%'
+		</if>
+		<if test="column != null">
+		order by ${column} ${sort}
+		</if>
+	</select>
+	
+</mapper>

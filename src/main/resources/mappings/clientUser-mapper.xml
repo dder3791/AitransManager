@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" 
+    "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.aiTrans.mapper.ClientUserMapper">
+	<select id="findClientUserByPage" resultType="com.aiTrans.entity.ClientUserFormMap" parameterType="com.aiTrans.entity.ClientUserFormMap">
+		select
+		clientUserD.* from clientUserD where certificationType=0
+		
+		<if test="userName!=null and userName!=''">
+			and clientUserD.userName like '%${userName}%'
+		</if>
+		<if test="cardId!=null and cardId!=''">
+			and clientUserD.cardId like '%${cardId}%'
+		</if>
+		<if test="tel!=null and tel!=''">
+			and clientUserD.tel like '%${tel}%'
+		</if>
+		<if test="emaile!=null and emaile!=''">
+			and clientUserD.emaile like '%${emaile}%'
+		</if>
+		<if test="column != null">
+		order by ${column} ${sort}
+		</if>
+		
+		
+	</select>
+	
+	
+	<update id="editUserCertifiState" parameterType="com.aiTrans.entity.ClientUserFormMap">
+		update clientUserD set certificationState=#{certificationState} where id=#{id}
+	</update>
+	
+	<!-- 根据用户银行账户查找用户 -->
+	<select id="findByBankAccount" parameterType="string" resultType="com.aiTrans.entity.ClientUserFormMap">
+		select * from clientUserD where bankAccount=#{bankAccount}
+	</select>
+</mapper>

@@ -1,0 +1,210 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" 
+    "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.aiTrans.mapper.RewardMapper">
+	<!-- <sql id="selectAll">
+		rewardsD.id,
+		rewardsD.length,
+		rewardsD.companyReward,
+		rewardsD.companySettlementTime,
+		rewardsD.companyTotal,
+		rewardsD.transReward,
+		rewardsD.transSettlementTime,
+		rewardsD.transTotal,
+		rewardsD.auditoryReward,
+		rewardsD.auditorySettlementTime,
+		rewardsD.auditoryTotal,
+		rewardsD.verifyReward,
+		rewardsD.length,
+		rewardsD.length,
+		rewardsD.length,
+		rewardsD.length
+	</sql> -->
+	<!-- 要查询的字段 -->
+	<sql id="companyRecord">
+		rewardsD.id reward_id,
+		rewardsD.priceTotal,
+		rewardsD.length,
+		rewardsD.companySettlementTime,
+		rewardsD.companyPayment,
+		customerD.id customer_id,
+		customerD.nameZH,
+		customerD.nameEN,
+		projectD.id project_id,
+		projectD.name,
+		projectD.completeTime,
+		
+		rewardsD.translatorFeeTotal,
+		rewardsD.transSettlementTime,
+		rewardsD.traPayment,
+		translatorD.id tra_id,
+		translatorD.realName traRealName,
+		
+		rewardsD.proofFeeTotal,
+		rewardsD.proofSettlementTime,
+		rewardsD.proofPayment,
+		proofreaderD.id pro_id,
+		proofreaderD.realName proofRealName,
+		
+		rewardsD.auditoryFeeTotal,
+		rewardsD.auditorySettlementTime,
+		rewardsD.audiPayment,
+		auditorD.id aud_id,
+		auditorD.realName auditorRealName
+	</sql>
+	
+	
+	
+	<sql id="traRecord">
+		rewardsD.id,
+		projectD.name,
+		rewardsD.translatorFeeTotal,
+		rewardsD.transSettlementTime,
+		rewardsD.traPayment,
+		translatorD.realName
+	</sql>
+	
+	<!-- 要查询的表格 -->
+	<sql id="companyRecordTable">
+		rewardsD,
+		customerD,
+		projectD,
+		tra_projectD,
+		translatorD,
+		proof_projectD,
+		proofreaderD,
+		auditor_projectD,
+		auditorD
+	</sql>
+	
+	<sql id="traRecordTable">
+		rewardsD,
+		projectD,
+		tra_projectD,
+		translatorD
+	</sql>
+	
+	<select id="lookReward" parameterType="int" resultType="com.aiTrans.entity.RewardFormMap">
+		select *  from rewardsD where id=#{pid}
+	</select>
+	
+	<!-- 查看公司资金流动 -->
+	<select id="findCompanyRecordByPage" resultType="com.aiTrans.entity.RewardFormMap">
+		select 	
+		<include refid="companyRecord" />
+		from 
+		<include refid="companyRecordTable" />
+		where
+		rewardsD.id=projectD.id
+		and projectD.id=tra_projectD.projectId
+		and tra_projectD.translatorId=translatorD.id
+		and projectD.id=proof_projectD.projectId
+		and proof_projectD.proofreaderId=proofreaderD.id
+		and projectD.id=auditor_projectD.projectId
+		and auditor_projectD.auditorId=auditorD.id
+		and projectD.customerId=customerD.id
+		<!-- order by projectD.completeTime DESC 不能有order by语句不然会生成两个order by 语句 -->
+		<if test="name != null and name != ''">
+		and projectD.name like '%${name}%'
+		</if>
+		<if test="column != null">
+          order by ${column} ${sort}
+        </if>
+	</select>
+	
+	
+	
+	<!-- 根据项目id(reward和project共用同一id)查看关于该项目的资金流动 -->
+	<!-- <select id="findCompanyRecordById" resultMap="projectResult">
+		select 	
+		<include refid="companyRecord" />
+		from 
+		<include refid="companyRecordTable" />
+		where
+		rewardsD.id=projectD.id
+		and projectD.id=tra_projectD.projectId
+		and tra_projectD.translatorId=translatorD.id
+		and projectD.id=proof_projectD.projectId
+		and proof_projectD.proofreaderId=proofreaderD.id
+		and projectD.id=auditor_projectD.projectId
+		and auditor_projectD.auditorId=auditorD.id
+		and projectD.customerId=customerD.id
+		and rewardsD.id=#{id}
+		order by projectD.completeTime DESC 不能有order by语句不然会生成两个order by 语句
+		<if test="name != null and name != ''">
+		and projectD.name like '%${name}%'
+		</if>
+		<if test="column != null">
+          order by ${column} ${sort}
+        </if>
+	</select>
+	
+	<resultMap type="com.aiTrans.entity.ProjectFormMap" id="projectResult">
+		<id property="id" column="project_id" />
+		<result property="name" column="name" />
+		<result property="completeTime" column="completeTime" />
+		
+		<association property="reward" javaType="com.aiTrans.entity.RewardFormMap">
+			<id property="id" column="reward_id" />
+			<result property="priceTotal" column="priceTotal" />
+			<result property="companySettlementTime" column="companySettlementTime" />
+			<result property="companyPayment" column="companyPayment" />
+			<result property="translatorFeeTotal" column="translatorFeeTotal" />
+			<result property="transSettlementTime" column="transSettlementTime" />
+			<result property="traPayment" column="traPayment" />
+			<result property="proofFeeTotal" column="proofFeeTotal" />
+			<result property="proofSettlementTime" column="proofSettlementTime" />
+			<result property="proofPayment" column="proofPayment" />
+			<result property="auditoryFeeTotal" column="auditoryFeeTotal" />
+			<result property="auditorySettlementTime" column="auditorySettlementTime" />
+			<result property="audiPayment" column="audiPayment" />
+		</association>
+
+		<association property="customer" javaType="com.aiTrans.entity.RewardFormMap">
+			<id property="id" column="customer_id" />
+			<result property="nameZH" />
+			<result property="nameEN" />
+		</association>
+		
+		<collection property="translator" ofType="com.aiTrans.entity.TranslatorFormMap">
+			<id property="id" column="tra_id" />
+			<result property="realName" column="traRealName" />
+		</collection>		
+		
+		<collection property="proofreader" ofType="com.aiTrans.entity.ProofreaderFormMap">
+			<id property="id" column="pro_id" />
+			<result property="realName" column="proofRealName" />
+		</collection>		
+		
+		<collection property="auditor" ofType="com.aiTrans.entity.AuditorFormMap">
+			<id property="id" column="aud_id" />
+			<result property="realName" column="auditorRealName" />
+		</collection>		
+	</resultMap> -->
+	
+	
+	<!-- 查看译员稿酬 -->
+	<select id="findTraRecordByPage" resultType="com.aiTrans.entity.RewardFormMap">
+		select 
+		<include refid="traRecord" />
+		from
+		<include refid="traRecordTable" />
+		where rewardsD.id=projectD.id
+		and projectD.id=tra_projectD.projectId
+		and tra_projectD.translatorId=translatorD.id
+		<if test="name != null">
+		and translatorD.realName like '%${name}%'
+		</if>
+		<if test="column != null">
+		order by ${column} ${sort}
+		</if>
+	</select>
+	
+	<!-- 根据id查找稿酬信息 -->
+	<select id="findById" parameterType="string" resultType="com.aiTrans.entity.RewardFormMap">
+		select rewardsD.* ,projectD.customerReference,projectD.reference from rewardsD,projectD where rewardsD.id=#{id} and projectD.id=rewardsD.id
+	</select>
+	
+	
+	
+</mapper>

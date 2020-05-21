@@ -1,0 +1,190 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" 
+    "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.aiTrans.mapper.OrderMapper">
+	<sql id="findOrderById">
+		orderD.id,
+		orderD.orderNumber,
+		orderD.orderReference reference,
+		orderD.generatedTime,
+		orderD.payNumber,
+		orderD.transTime,
+		orderD.prooTime,
+		orderD.expertTime,
+		orderD.examinationTime,
+		orderD.signTime,
+		orderD.customerEvaluate,
+		orderD.payState,
+		orderD.taskStateId,
+		orderD.transUrl,
+		orderD.completeTime orderCompleteTime,
+		orderD.clientUserId,
+		orderD.clientCustomerNeedId,
+		orderD.translatorid,
+		orderD.evaluateId,
+		orderD.orderTitle,
+		orderD.prooUrl,
+		orderD.auditUrl,
+		orderD.rejection,
+		orderStateD.orderState,
+		clientUserD.userName as userName,
+		translatorD.nickName as nickName,
+		clientCustomerNeedD.completeTime completeTime,
+		clientCustomerNeedD.publishModel publishModel,
+		clientCustomerNeedD.languagePair,
+		clientCustomerNeedD.transLevel,
+		clientCustomerNeedD.tel,
+		clientCustomerNeedD.qq,
+		clientCustomerNeedD.totalMoney,
+		clientCustomerNeedD.length,
+		clientCustomerNeedD.cycle,
+		clientCustomerNeedD.fileURL,
+		clientCustomerNeedD.acceptState,
+		clientCustomerNeedD.EXPIRYDATE,
+		clientCustomerNeedD.procedureTypeId,
+		clientCustomerNeedD.domainId,
+		procedureTypeD.procedureType,
+		fieldD.field,
+		evaluateClientD.understandLevel,
+		evaluateClientD.degreeOfSmooth,
+		evaluateClientD.completionSpeed,
+		evaluateClientD.rigor,
+		evaluateClientD.score,
+		evaluateClientD.evaluateDetails,
+		evaluateClientD.state,
+		evaluateClientD.integrality,
+		evaluateClientD.format
+	</sql>
+	<sql id="findOrderByIdGroupBy">
+		orderD.id,
+		orderD.orderNumber,
+		orderD.orderReference,
+		orderD.generatedTime,
+		orderD.payNumber,
+		orderD.transTime,
+		orderD.prooTime,
+		orderD.expertTime,
+		orderD.examinationTime,
+		orderD.signTime,
+		orderD.customerEvaluate,
+		orderD.payState,
+		orderD.taskStateId,
+		orderD.transUrl,
+		orderD.completeTime,
+		orderD.clientUserId,
+		orderD.clientCustomerNeedId,
+		orderD.translatorid,
+		orderD.evaluateId,
+		orderD.orderTitle,
+		orderD.prooUrl,
+		orderD.auditUrl,
+		orderStateD.orderState,
+		clientUserD.userName,
+		translatorD.nickName,
+		clientCustomerNeedD.completeTime,
+		clientCustomerNeedD.publishModel,
+		clientCustomerNeedD.languagePair,
+		clientCustomerNeedD.transLevel,
+		clientCustomerNeedD.tel,
+		clientCustomerNeedD.qq,
+		clientCustomerNeedD.totalMoney,
+		clientCustomerNeedD.length,
+		clientCustomerNeedD.cycle,
+		clientCustomerNeedD.fileURL,
+		clientCustomerNeedD.acceptState,
+		clientCustomerNeedD.EXPIRYDATE,
+		clientCustomerNeedD.procedureTypeId,
+		clientCustomerNeedD.domainId,
+		procedureTypeD.procedureType,
+		fieldD.field,
+		evaluateClientD.understandLevel,
+		evaluateClientD.degreeOfSmooth,
+		evaluateClientD.completionSpeed,
+		evaluateClientD.rigor,
+		evaluateClientD.score,
+		evaluateClientD.evaluateDetails,
+		evaluateClientD.state,
+		evaluateClientD.integrality,
+		evaluateClientD.format,
+		orderD.rejection
+	</sql>
+	
+	<sql id="findClientOrderByPage">
+		orderD.id,
+		orderD.orderNumber,
+		orderD.orderReference reference,
+		orderD.generatedTime,
+		orderD.payNumber,
+		orderD.transTime,
+		orderD.prooTime,
+		orderD.expertTime,
+		orderD.examinationTime,
+		orderD.signTime,
+		orderD.customerEvaluate,
+		orderD.payState,
+		orderD.taskStateId taskState,
+		orderD.transUrl,
+		orderD.completeTime orderCompleteTime,
+		orderD.clientUserId,
+		orderD.clientCustomerNeedId,
+		orderD.translatorid,
+		orderD.evaluateId,
+		orderD.orderTitle,
+		orderD.prooUrl,
+		orderD.auditUrl,
+		orderD.rejection,
+		orderStateD.orderState,
+		clientUserD.userName as userName,
+		translatorD.nickName as nickName,
+		clientCustomerNeedD.completeTime completeTime,
+		clientCustomerNeedD.publishModel publishModel
+	</sql>
+
+	<select id="findClientOrderByPage" parameterType="com.aiTrans.entity.OrderFormMap"
+		resultType="com.aiTrans.entity.OrderFormMap">
+		select
+		<include refid="findClientOrderByPage" />
+		from orderD,clientUserD,translatorD,clientCustomerNeedD,orderStateD
+		where
+		orderD.clientUserId=clientUserD.id and
+		orderD.translatorid=translatorD.id and 
+		orderD.clientCustomerNeedId=clientCustomerNeedD.id and
+		orderStateD.id=orderD.taskStateId 
+		<if test="nickname!=null and nickname!=''">
+		 and translatorD.nickname like '%${nickname}%'
+		</if>
+		<if test="orderReference!=null and orderReference!='' ">
+		 and orderD.orderReference like '%${orderReference}%'
+		</if>
+		<if test="testState!=null and testState!=''">
+		 and orderStateD.orderState like '%${testState}%'
+		</if>
+	</select>
+	
+	<select id="findOrderById" parameterType="string" resultType="com.aiTrans.entity.OrderFormMap">
+		SELECT <include refid="findOrderById"/> FROM
+		clientUserD,
+		translatorD,
+		clientCustomerNeedD,
+		orderStateD,
+		procedureTypeD,
+		fieldD,
+		orderD
+		LEFT JOIN evaluateClientD
+		on evaluateClientD.id=orderD.evaluateId
+		WHERE
+			orderD.id =#{id}
+		AND orderD.clientUserId = clientUserD.id
+		AND orderD.translatorid = translatorD.id
+		AND orderD.clientCustomerNeedId = clientCustomerNeedD.id
+		AND orderStateD.id = orderD.taskStateId
+		AND clientCustomerNeedD.procedureTypeId = procedureTypeD.id
+		AND clientCustomerNeedD.domainId = fieldD.id
+		<!-- AND orderD.id=ORDER_EVALUATECLIENT.VorderId -->
+		GROUP BY <include refid="findOrderByIdGroupBy"/> 
+	</select>
+
+	<update id="updateTaskState" parameterType="com.aiTrans.entity.OrderFormMap">
+		update orderD set orderD.taskStateId=#{taskStateId} where id=#{id}
+	</update>
+</mapper>

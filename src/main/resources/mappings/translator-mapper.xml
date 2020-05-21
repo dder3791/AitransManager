@@ -1,0 +1,310 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" 
+    "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.aiTrans.mapper.TranslatorMapper">
+	<!--mybatis ehcache缓存配置 -->
+	<!-- 以下两个<cache>标签二选一,第一个可以输出日志,第二个不输出日志 <cache type="org.mybatis.caches.ehcache.LoggingEhcache" 
+		/> -->
+	<!-- <cache type="org.mybatis.caches.ehcache.EhcacheCache"/> -->
+	<!-- 以下与实体类的中字段一致 -->
+	<sql id="selectTranslator">
+		translatorD.id,
+		realName,
+		nickname,
+		language,
+		degree,
+		level,
+		majorId,
+		domain,
+		description,
+		majorD.name majorName
+	</sql>
+	<sql id="myReward">
+		rewardsD.id,
+		projectD.name,
+		translatorFeeKilo,
+		length,
+		((length/1000)*translatorFeeKilo) translatorFeeTotal,
+		transSettlementTime
+	</sql>
+	<sql id="participants">
+		translatorD.id,
+		realName,
+		nickname,
+		translatorD.language,
+		degree,
+		level,
+		domain,
+		translatorD.description,
+	</sql>
+	<sql id="groupByParticipants">
+		tname,
+		translatorD.id,
+		realName,
+		nickname,
+		translatorD.language,
+		degree,
+		level,
+		domain,
+		translatorD.description
+	</sql>
+	
+<!-- 	<sql id="selectId">
+		id,
+		realName,
+		nickname,
+		language,
+		degree,
+		level,
+		majorD.name,
+		domain,
+		description
+	</sql> -->
+
+<!-- 	<select id="findTransferPage" resultType="com.aiTrans.entity.TranslatorFormMap">
+		select
+		<include refid="selectId" />
+		from translatorD inner join majorD 
+		on language = '${language}' and majorD.id=translatorD.majorId 
+		<if test="account != null and account != ''">
+		and account like '%${account}%'
+		</if>
+		<if test="column != null">
+          order by ${column} ${sort}
+        </if>
+		
+	</select> -->
+	
+	<!-- 根据id查询译员 -->
+	<select id="findById" parameterType="com.aiTrans.entity.ProjectFormMap" resultType="com.aiTrans.entity.TranslatorFormMap">
+		select nickname from translatorD where id=${translatorId}
+	</select>
+	
+	<!-- 根据语种查询译员id name -->
+	<select id="findtransIdandName" resultType="com.aiTrans.entity.TranslatorFormMap">
+		select 
+		id,nickname
+		from translatorD where 
+		language = '${language}' and domain like '%${domain}%'
+	</select>
+	
+	<!-- 查看昵称为name的译员数量:判断是否重复 -->
+	<select id="findNicknameCount" resultType="int">
+		select count(id) from translatorD where nickname=#{name}
+	</select>
+	
+	<!-- 我的稿酬 -->
+	<select id="findMyRewardPage" resultType="com.aiTrans.entity.TranslatorFormMap">
+		select 
+		<include refid="myReward" />
+		from rewardsD 
+		inner join projectD
+		on projectD.id=rewardsD.id 
+		and projectD.id in(select projectD.id from tra_projectD where translatorId=${translatorId})
+		<if test="column != null">
+			order by ${column} ${sort}
+		</if>
+	</select>
+	
+	
+	<!-- 译员列表 -->
+	<select id="findTransferPage" resultType="com.aiTrans.entity.TranslatorFormMap">
+		select 
+		<include refid="selectTranslator" />
+		from translatorD inner join majorD
+		on majorD.id=majorId 
+		and language = '${language}' 
+		<if test="nickname != null and nickname != ''">
+		and nickname like '%${nickname}%'
+		</if>
+		<if test="column != null">
+          order by ${column} ${sort}
+        </if>
+		
+	</select>
+	
+	<!-- 校对员分页查找 -->
+	<select id="findProofreaderPage" resultType="com.aiTrans.entity.TranslatorFormMap" parameterType="com.aiTrans.entity.TranslatorFormMap">
+		select * from translatorD where
+		1=1 
+		<!-- proofreadUrl is not null -->
+		<!-- and isProofread>=1 -->
+		<!-- <if test="isProofread!=null and isProofread!=''">
+		and isProofread=${isProofread}
+		</if> -->
+		<if test="nickname != null and nickname != ''">
+		and nickname like '%${nickname}%'
+		</if>
+		<if test="tel!=null and tel!=''">
+		and tel like '%${tel}%'
+		</if>
+		<if test="accountName!=null and accountName!=''">
+		and accountName like '%${accountName}%'
+		</if>
+		<if test="email!=null and email!=''">
+		and email like '%${email}%'
+		</if>
+		<if test="column != null">
+          order by ${column} ${sort}
+        </if>
+		
+	</select>
+	
+	
+	<!-- 翻译员分页查找 -->
+	<select id="findToTransPage" resultType="com.aiTrans.entity.TranslatorFormMap" parameterType="com.aiTrans.entity.TranslatorFormMap">
+		select * from translatorD where 
+		1=1
+		<!-- resumeUrl is not null -->
+		<!-- and isVerifty>=1 -->
+		<if test="nickname != null and nickname != ''">
+		and nickname like '%${nickname}%'
+		</if>
+		<if test="tel!=null and tel!=''">
+		and tel like '%${tel}%'
+		</if>
+		<if test="accountName!=null and accountName!=''">
+		and accountName like '%${accountName}%'
+		</if>
+		<if test="email!=null and email!=''">
+		and email like '%${email}%'
+		</if>
+		<if test="column != null">
+          order by ${column} ${sort}
+        </if>
+		
+	</select>
+	
+	<!-- 审核员分页查找 -->
+	<select id="findTransToAuditoryPage" resultType="com.aiTrans.entity.TranslatorFormMap" parameterType="com.aiTrans.entity.TranslatorFormMap">
+		select * from translatorD where 
+		1=1
+		<!-- auditUrl is not null -->
+		<!-- and isAudit>=1 -->
+		<if test="nickname != null and nickname != ''">
+		and nickname like '%${nickname}%'
+		</if>
+		<if test="tel!=null and tel!=''">
+		and tel like '%${tel}%'
+		</if>
+		<if test="accountName!=null and accountName!=''">
+		and accountName like '%${accountName}%'
+		</if>
+		<if test="email!=null and email!=''">
+		and email like '%${email}%'
+		</if>
+		<if test="column != null">
+          order by ${column} ${sort}
+        </if>
+		
+	</select>
+	
+	
+	
+	<select id="findMajorNameByTraId" resultType="String">
+		select name from translatorD left join majorD on translatorD.majorId=majorD.id where translatorD.id=#{id}
+	</select>
+	
+	<!-- 查看参与协同项目的译员 -->
+	<select id="findParticipantsPage" resultType="com.aiTrans.entity.TranslatorFormMap">
+		select
+		<include refid="participants"/>
+		pname=STUFF(
+			(SELECT ','+pname FROM PRO_TRA B WHERE A.tname=B.tname FOR XML PATH('')), 1, 1, '')
+		from translatorD,projectD,PRO_TRA A
+		where translatorD.cooperativeState = 1
+		
+		and tname=translatorD.nickname
+		
+		<if test="nickname != null and nickname != ''">
+		and nickname like '%${nickname}%'
+		</if>
+		<if test="column != null">
+          order by ${column} ${sort}
+        </if>
+        GROUP BY
+		<include refid="groupByParticipants"/>
+	</select>
+	
+	<!-- 查看在线译员 -->
+	<select id="findOnlineTransferPage" resultType="com.aiTrans.entity.TranslatorFormMap">
+		select
+		<include refid="selectTranslator" />
+		from translatorD
+		where 1 = 1 and onlineState = 1
+		<if test="account != null and account != ''">
+		and account like '%${account}%'
+		</if>
+		<if test="column != null">
+          order by ${column} ${sort}
+        </if>
+	</select>
+	
+	<!-- 查看黑名单 -->
+	<select id="findBlack" resultType="com.aiTrans.entity.TranslatorFormMap">
+		select
+		<include refid="selectTranslator" />
+		from translatorD
+		where blackSate=1
+		<if test="account != null and account != ''">
+		and account like '%${account}%'
+		</if>
+		<if test="column != null">
+          order by ${column} ${sort}
+        </if>
+	</select>
+	
+	<!-- 查找所有译员信息 -->
+	<select id="findTranslator"  resultType="com.aiTrans.entity.TranslatorFormMap" >
+	  select id,nickname from translatorD
+	</select>
+	
+	<!-- 根据译员名称查找id -->
+	<select id="findTranslatorId" parameterType="String" resultType="String">
+	select id from translatorD where nickname=#{nickname}
+	</select>
+	
+	<!-- 修改译员积分 -->
+	<update id="editPoint" parameterType="com.aiTrans.entity.TranslatorFormMap">
+		update translatorD set point=${point} where id=#{id}
+	</update>
+	
+	<!-- 修改译员为校对员 -->
+	<update id="editTransTOProofreader" parameterType="com.aiTrans.entity.TranslatorFormMap">
+		update translatorD set isProofread=${isProofread} where id=#{id}
+	</update>
+	
+	<!-- 修改译员为翻译员 -->
+	<update id="editTOTrans" parameterType="com.aiTrans.entity.TranslatorFormMap">
+		update translatorD set isVerifty=${isVerifty} where id=#{id}
+	</update>
+	
+	<!-- 修改译员为审核员 -->
+	<update id="editTransToAuditory" parameterType="com.aiTrans.entity.TranslatorFormMap">
+		update translatorD set isAudit=${isAudit} where id=#{id}
+	</update>
+	
+	<!-- 译员认证信息审核 -->
+	<update id="transClientCre" parameterType="com.aiTrans.entity.TranslatorFormMap">
+		update translatorD set certificationStatus=${certificationStatus} where id=#{id}
+	</update>
+	
+	<select id="findByAccountNumber" parameterType="string" resultType="com.aiTrans.entity.TranslatorFormMap">
+		select * from translatorD where accountNumber=#{accountNumber}
+	</select>
+	
+	<update id="editTransLanLevDoma" parameterType="com.aiTrans.entity.TranslatorFormMap">
+		update translatorD set domain=#{domain}
+		<if test="language!=null and language!=''">
+			,language=#{language}
+		</if>
+		<if test="level>0">
+		 	,level=#{level}
+		</if>
+		
+		where id=#{id}
+	</update>
+	<select id="queryById" parameterType="com.aiTrans.entity.TranslatorFormMap" resultType="com.aiTrans.entity.TranslatorFormMap">
+		select * from translatorD where id=${id}
+	</select>
+</mapper>

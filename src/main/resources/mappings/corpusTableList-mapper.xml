@@ -1,0 +1,142 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" 
+    "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.aiTrans.mapper.CorpusTableListMapper">
+	<!--mybatis ehcache缓存配置 -->
+	<!-- 以下两个<cache>标签二选一,第一个可以输出日志,第二个不输出日志 <cache type="org.mybatis.caches.ehcache.LoggingEhcache" 
+		/> -->
+	<!-- <cache type="org.mybatis.caches.ehcache.EhcacheCache"/> -->
+	<!-- 以下与实体类的中字段一致 -->
+	<sql id="selectId">
+		corpusTableListD.id,
+		corpusTableListD.oriLanguage,
+		corpusTableListD.corpusName,
+		corpusTableListD.isProofread,
+		corpusTableListD.languagePair,
+		corpusTableListD.proofreaderId,
+		corpusTableListD.translatorId,
+		corpusTableListD.auditorId,
+		corpusTableListD.remark,
+		corpusTableListD.domainId
+	</sql>
+	
+	<!-- 2017年4月17日13:52:15 -->
+	<select id="findFirstPage" resultType="com.aiTrans.entity.CorpusTableListFormMap">
+		select
+		corpusTableListD.id,
+		corpusTableListD.oriLanguage,
+		corpusTableListD.corpusName,
+		corpusTableListD.isProofread,
+		corpusTableListD.languagePair,
+		corpusTableListD.proofreaderId,
+		corpusTableListD.translatorId,
+		corpusTableListD.auditorId,
+		corpusTableListD.remark,
+		auditorD.nickname as aname,
+		proofreaderD.nickname as pname,
+		domainD.name as dname,
+		translatorD.nickname as tname
+		from corpusTableListD,auditorD,proofreaderD,
+		domainD,translatorD
+		where 
+		corpusTableListD.domainId=domainD.id and 
+		corpusTableListD.translatorId=translatorD.id and 
+		corpusTableListD.auditorId=auditorD.id and 
+		corpusTableListD.proofreaderId=proofreaderD.id 
+		and corpusTableListD.corpusName in ( 
+		(select corpusName from corpusTableListD where oriLanguage='${oriLanguage}' group by corpusName) )
+		<!-- and corpusTableListD.id in 
+		(select MIN(id) from corpusTableListD where oriLanguage='${oriLanguage}' group by corpusName) -->
+		<if test="corpusName != null and corpusName != ''">
+		and corpusTableListD.corpusName like '%${corpusName}%'
+		</if>
+		<if test="column != null">
+          order by ${column} ${sort}
+        </if>
+	</select>
+     
+     <!-- 根据语言查找对应的待定人员 -->
+	<select id="findProofreadnickname" parameterType="com.aiTrans.entity.CorpusTableListFormMap" resultType="int">
+	 select id from proofreaderD where nickname like '%待定%' and language='${oriLanguage}'
+	</select>
+	
+	<!-- 查询校对员信息 -->
+	<select id="findProofreadLanguage" parameterType="com.aiTrans.entity.CorpusTableListFormMap" resultType="com.aiTrans.entity.ProofreaderFormMap">
+	select proofreaderD.* from proofreaderD where language='${oriLanguage}'
+    </select>
+	
+	<!-- 查询审核员信息 -->
+	<select id="findAuditerLanguage" parameterType="com.aiTrans.entity.CorpusTableListFormMap" resultType="com.aiTrans.entity.AuditorFormMap" >
+	 select auditorD.* from auditorD  where language='${oriLanguage}'
+	</select>
+	
+	<!-- 根据语言查找对应的审核人员 -->
+	<select id="findAuditernickname" parameterType="com.aiTrans.entity.CorpusTableListFormMap" resultType="int">
+	 select id from auditorD where nickname like '%待定%' and language='${oriLanguage}'
+	</select>
+	
+	<!-- 查询译员信息 -->
+	<select id="findTranslatorLanguage" parameterType="com.aiTrans.entity.CorpusTableListFormMap"  resultType="com.aiTrans.entity.TranslatorFormMap" >
+	 select 
+		id,nickname
+		from translatorD where 
+		language = '${oriLanguage}' and domain like '%${domain}%'
+	</select>
+	
+	<!-- 查询领域 -->  
+	<select id="findDomain"  resultType="com.aiTrans.entity.CorpusTableListFormMap">
+	  select name,id  from domainD  
+	</select>
+	
+	
+	<!-- 2017年4月21日10:33:43 -->
+	<!-- 根据id查询语料名称 -->
+	<select id="findCorpusNameById" parameterType="String" resultType="String">
+		select corpusName from corpusTableListD where id=#{id}
+	</select>
+	
+	<!-- 通过id查询corpusTableListFromMap对象 -->
+	<select id="findCorpusTableListById" resultType="com.aiTrans.entity.CorpusTableListFormMap">
+		select * from corpusTableListD where id=#{id}
+	</select>
+	
+
+	 <!--   根据名字查询领域id -->
+	<select id="findDomainName"  parameterType="com.aiTrans.entity.CorpusTableListFormMap" resultType="int">
+	SELECT id from domainD where name='${domainName}'
+	</select>
+	
+	<!-- 通过name查询corpusTableListFromMap对象 -->
+	<select id="findCorpusTableListByName" resultType="com.aiTrans.entity.CorpusTableListFormMap">
+		select * from corpusTableListD where corpusName=#{corpusName}
+	</select>
+	
+	<!-- 添加corpusTableList -->
+    <insert id="addCorpusTableList">
+    	insert into corpusTableListD values(#{isProofread},#{remark},#{oriLanguage},#{corpusName},#{languagePair},#{domainId},#{proofreaderId},#{translatorId},#{auditorId})
+    </insert>
+    
+	<!-- 修改corpusTableList -->
+	<update id="editCorpusTableList">
+		update corpusTableListD set 
+		isProofread=#{isProofread},remark=#{remark},oriLanguage=#{oriLanguage},corpusName=#{corpusName}, 
+		languagePair=#{languagePair},domainId=#{domainId},proofreaderId=#{proofreaderId},translatorId=#{translatorId},auditorId=#{auditorId}
+		where id=#{id}
+	</update>
+	
+	<delete id="deleteById">
+	delete from corpusTableListD where id=#{id}
+	</delete>
+	
+	<!-- 查找主外表有无相同字段 -->
+    <select id="findForeignKey" parameterType="com.aiTrans.entity.CorpusTableListFormMap"  resultType="int" >
+    SELECT
+	COUNT (CorpusId) as total
+    FROM
+	corpusTableD,corpusTablelistD
+    WHERE
+	corpusTableD.CorpusId = corpusTablelistD.id
+    AND corpusTablelistD.id =#{id}
+	</select>
+	
+</mapper>

@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" 
+    "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+    
+<mapper namespace="com.aiTrans.mapper.ArticleMapper">
+
+	<sql id="findArticleByPage">
+		articleD.id,
+		articleD.hot,
+		articleD.elite,
+		articleD.title,
+		articleD.issueDate,
+		articleD.context,
+		articleD.auther,
+		articleD.type,
+		articleD.url
+	</sql>
+	<!-- 查找资讯信息 -->
+	<select id="findArticleByPage" parameterType="com.aiTrans.entity.ArticleFormMap" resultType="com.aiTrans.entity.ArticleFormMap">
+		select 
+		<include refid="findArticleByPage" />
+		from articleD where 1=1
+		<if test="title!=null and title!='' ">
+			and articleD.title like '%${title}%'
+		</if>
+		<if test="context!=null and context!='' ">
+			and articleD.context like '%${context}%'
+		</if>
+		<if test="auther!=null and auther!='' ">
+			and articleD.auther like '%${auther}%'
+		</if>
+		<if test="issueDate!=null and issueDate!='' ">
+			and articleD.issueDate like '%${issueDate}%'
+		</if>
+		<if test="type!=null and type!='' ">
+			and articleD.type like '%${type}%'
+		</if>
+		<if test="hot!=null and hot!='' ">
+			and articleD.hot=${hot}
+		</if>
+		<if test="elite!=null and elite!='' ">
+			and articleD.elite=${elite}
+		</if>
+		<if test="column != null">
+          order by ${column} ${sort}
+        </if>
+	</select>
+</mapper>

@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" 
+    "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.aiTrans.mapper.TraProjectMapper">
+<!-- 通过项目id查找译员id -->
+<select id="findByProjectid" parameterType="int" resultType="com.aiTrans.entity.TraProjectFormMap">
+	select * from tra_projectD where projectId=#{projectId}
+</select>
+
+<select id="findById" parameterType="com.aiTrans.entity.TraProjectFormMap" resultType="com.aiTrans.entity.TraProjectFormMap">
+	select * from tra_projectD where projectId='${projectId}' and translatorId='${translatorId}'
+</select>
+
+
+<!-- 根据译员id查找相对应的项目id -->
+<select id="findTran_project" parameterType="String" resultType="com.aiTrans.entity.TraProjectFormMap">
+	select id,name from  projectD  where id in(select projectId from tra_projectD where translatorId=#{translatorId}) 
+</select>
+
+
+
+</mapper>

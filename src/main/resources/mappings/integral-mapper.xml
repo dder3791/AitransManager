@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" 
+    "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.aiTrans.mapper.IntegralMapper">
+	 
+	<!-- 以下与实体类的中字段一致 -->
+	<sql id="selectId">
+	    integralD.id,
+		integralD.prize,
+		integralD.markMin,
+		integralD.URL,
+		integralD.remark
+	</sql>
+	
+	<select id="findFirstPage" resultType="com.aiTrans.entity.IntegralFormMap" parameterType="com.aiTrans.entity.IntegralFormMap">
+	      select 
+	     integralD.id,
+		integralD.prize,
+		integralD.markMin,
+		integralD.URL,
+		integralD.remark,
+		 categoryD.prizeName
+	      from  integralD,categoryD
+	      WHERE categoryId=categoryD.id
+		<if test="prize != null and prize != ''">
+		and prize like '%${prize}%'
+		</if>
+		<if test="prizeName != null and prizeName != ''">
+		and prizeName like '%${prizeName}%'
+		</if>
+		<if test="markMin != null and markMin != ''">
+		and markMin like '%${markMin}%'
+		</if>
+		<if test="column != null">
+          order by ${column} ${sort}
+        </if>
+	</select>
+	
+	<select id="findCategory" resultType="com.aiTrans.entity.CategoryFormMap">
+     select * from CategoryD 
+     </select>
+	
+	
+	
+</mapper>

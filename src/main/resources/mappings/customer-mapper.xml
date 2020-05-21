@@ -1,0 +1,97 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" 
+    "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.aiTrans.mapper.CustomerMapper">
+	<!--mybatis ehcache缓存配置 -->
+	<!-- 以下两个<cache>标签二选一,第一个可以输出日志,第二个不输出日志 <cache type="org.mybatis.caches.ehcache.LoggingEhcache" 
+		/> -->
+	<!-- <cache type="org.mybatis.caches.ehcache.EhcacheCache"/> -->
+	<!-- 以下与实体类的中字段一致 -->
+	<sql id="selectId">
+		id,
+		nameZH,
+		nameEN,
+		shortName,
+		address,
+		cel,
+		tel,
+		fax,
+		email,
+		head,
+		quotedPrice,
+		historicalQuotedPrice,
+		addDate,
+		description
+	</sql>
+
+	<select id="findInternalPage" resultType="com.aiTrans.entity.CustomerFormMap">
+		select
+		<include refid="selectId" />
+		from customerD
+		where 1 = 1 and isForeign = 0
+		<if test="name != null and name != ''">
+		and name like '%${name}%'
+		</if>
+		<if test="column != null">
+          order by ${column} ${sort}
+        </if>
+	</select>
+	
+	<select id="findForeignPage" resultType="com.aiTrans.entity.CustomerFormMap">
+		select
+		<include refid="selectId"/>
+		from customerD
+		where 1 = 1 and isForeign = 1
+		<if test="name != null and name != ''">
+		and name like '%${name}%'
+		</if>
+		<if test="column != null">
+          order by ${column} ${sort}
+        </if>
+	</select>
+	
+	<select id="findOnlineCustomerPage" resultType="com.aiTrans.entity.CustomerFormMap">
+		select
+		<include refid="selectId"/>
+		from customerD
+		where 1 = 1 and onlineState = 1
+		<if test="name != null and name != ''">
+		and name like '%${name}%'
+		</if>
+		<if test="column != null">
+          order by ${column} ${sort}
+        </if>
+	</select>
+	
+	<select id="findLargePage" resultType="com.aiTrans.entity.CustomerFormMap">
+		select
+		<include refid="selectId"/>
+		from customerD
+		where 1 = 1 and type = 1
+		<if test="name != null and name != ''">
+		and name like '%${name}%'
+		</if>
+		<if test="column != null">
+          order by ${column} ${sort}
+        </if>
+	</select>
+	
+	<select id="findCustomerProjectPage" resultType="com.aiTrans.entity.CustomerFormMap">
+		select 
+		<include refid="selectId"/>
+		from customerD		
+		where 1 = 1 
+		<if test="name != null and name != ''">
+		 	and nameZH like '%${name}%'
+        </if>
+	</select>
+	
+	
+	<select id="findIdAndName" resultType="com.aiTrans.entity.CustomerFormMap">
+		select id,nameZH from customerD
+	</select>
+	
+	<select id="findById" parameterType="com.aiTrans.entity.ProjectFormMap" resultType="com.aiTrans.entity.CustomerFormMap">
+		select nameZH from CustomerD where id=${customerId}
+	</select>
+</mapper>

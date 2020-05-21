@@ -1,0 +1,93 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" 
+    "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.aiTrans.mapper.ResourcesMapper">
+	<!--mybatis ehcache缓存配置 -->
+	<!-- 以下两个<cache>标签二选一,第一个可以输出日志,第二个不输出日志 <cache type="org.mybatis.caches.ehcache.LoggingEhcache" 
+		/> -->
+	<!-- <cache type="org.mybatis.caches.ehcache.EhcacheCache"/> -->
+
+	<sql id="selectId">
+		id,
+		name,
+		parentId,
+		(select r.name from resourcesD r where r.id = r.parentId )
+		parentName,
+		resKey,
+		ishide,
+		type,
+		resUrl,
+		level,
+		icon,
+		description
+	</sql>
+	
+	<!--通过角色id查看该角色的权限  -->
+	<select id="findTransferRes" resultType="com.aiTrans.entity.ResFormMap">
+	select
+	r.id,r.name,parentId,
+	(select r.name from resourcesD where r.id = r.parentId )
+	parentName,resKey,ishide,type,resUrl,level,icon,r.description
+	from resourcesD r inner join roleD
+	on r.roleId=roleD.id and roleD.id=#{roleId}
+		
+	</select>
+	
+	<select id="findChildlists" resultType="com.aiTrans.entity.ResFormMap">
+		SELECT
+		<include refid="selectId" />
+		from resourcesD
+		where parentId = #{id}
+	</select>
+	<!-- 获取该用户的权限 -->
+	<select id="findRes" parameterType="String" resultType="com.aiTrans.entity.ResFormMap">
+		SELECT
+		<include refid="selectId" />
+		from resourcesD where id in(
+		select resId from
+		res_userD where 1=1
+		<if test="userId != null and userId != '' and userId != 0">
+		and userId = #{userId}
+		</if>
+		<if test="roleId != null and roleId != '' and roleId != 0">
+		and userId in (
+		      SELECT userId from user_roleD where roleId = #{roleId}
+		   )
+		</if>
+		)
+		<if test="parentId != null and parentId != '' and parentId != 0">
+			and parentId = #{parentId}
+		</if>
+		order by level asc
+	</select>
+
+	<!-- 根据账号Id获取该用户的权限 -->
+	<select id="findUserResourcess" parameterType="String"
+		resultType="com.aiTrans.entity.ResFormMap">
+		SELECT
+		<include refid="selectId" />
+		from resourcesD where id in(
+		select resId from res_userD
+		where userId=#{userId})
+	</select>
+	<update id="updateSortOrder" parameterType="java.util.List">
+          <foreach collection="list" item="item" index="index" open="" close="" separator=";">
+                update resourcesD
+                <set>
+                  level = #{item.level}
+                </set>
+                where id = #{item.id}
+         </foreach>
+	</update>
+	<!-- 删 -->
+	<delete id="deleteResourcesRole" parameterType="String">
+		delete from
+		res_rolesD
+		where role_id=#{id}
+	</delete>
+
+	<insert id="addRoleRes">
+		insert into res_rolesD (role_id,resc_id) value (#{roleId},#{resId})
+	</insert>
+
+</mapper>

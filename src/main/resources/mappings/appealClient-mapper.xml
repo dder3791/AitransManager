@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" 
+    "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.aiTrans.mapper.AppealClientMapper">
+	<select id="findAppealPage" resultType="com.aiTrans.entity.AppealClientFormMap" parameterType="com.aiTrans.entity.AppealClientFormMap">
+		select
+		appealClientD.*,
+		orderD.orderReference reference ,translatorD.nickname nickname
+		FROM appealClientD,orderD ,translatorD
+		where orderD.id=appealClientD.orderid
+		and translatorD.id=appealClientD.translatorId
+		<if test="reference!=null and reference!=''">
+		and orderD.orderReference like '%${reference}%'
+		</if>
+		<if test="nickname!=null and nickname!=''">
+			and translatorD.nickname like '%${nickname}%'
+		</if>
+		<if test="column != null">
+		order by ${column} ${sort}
+		</if>
+		
+		
+	</select>
+	
+	
+	<update id="editAppealState" parameterType="com.aiTrans.entity.AppealClientFormMap">
+		update appealClientD set appealstate=#{appealstate} where id=#{id}
+	</update>
+</mapper>

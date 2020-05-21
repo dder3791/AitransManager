@@ -1,0 +1,129 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" 
+    "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.aiTrans.mapper.TermTableListMapper">
+	<!--mybatis ehcache缓存配置 -->
+	<!-- 以下两个<cache>标签二选一,第一个可以输出日志,第二个不输出日志 <cache type="org.mybatis.caches.ehcache.LoggingEhcache" 
+		/> -->
+	<!-- <cache type="org.mybatis.caches.ehcache.EhcacheCache"/> -->
+	<!-- 以下与实体类的中字段一致 -->
+	<!-- <sql id="selectId">
+		termTableD.id,
+		termTableD.sourceText,
+		termTableD.translation
+	</sql> -->
+	<sql id="selectTermFirst">
+		id,
+		language,
+		name,
+		isProofread,
+		transType,
+		urlname,
+		domainId,
+		verifierId,
+		remark
+	</sql>
+	
+	 <select id="findFirstPage" resultType="com.aiTrans.entity.TermTableListFormMap">
+		select
+		termTableListD.id,
+		termTableListD.oriLanguage,
+		termTableListD.termName,
+		termTableListD.isProofread,
+		termTableListD.languagePair,
+		termTableListD.proofreaderId,
+		termTableListD.translatorId,
+		termTableListD.auditorId,
+		termTableListD.remark,
+		auditorD.nickname as aname,
+		proofreaderD.nickname as pname,
+		domainD.name as dname,
+		translatorD.nickname as tname
+		from termTableListD,auditorD,proofreaderD,
+		domainD,translatorD
+		where 
+		termTableListD.domainId=domainD.id and 
+		termTableListD.translatorId=translatorD.id and 
+		termTableListD.auditorId=auditorD.id and 
+		termTableListD.proofreaderId=proofreaderD.id 
+		and termTableListD.termName in ( 
+		(select termName from termTableListD where oriLanguage='${oriLanguage}' group by termName) )
+		<!-- and termTableListD.id in 
+		(select MIN(id) from termTableListD where oriLanguage='${oriLanguage}' group by termName) -->
+		<if test="termName != null and termName != ''">
+		and termTableListD.termName like '%${termName}%'
+		</if>
+		<if test="column != null">
+          order by ${column} ${sort}
+        </if>
+	</select>
+	 
+     <!-- 根据语言查找对应的待定人员 -->
+	<select id="findProofreadnickname" parameterType="com.aiTrans.entity.TermTableListFormMap" resultType="int">
+	 select id from proofreaderD where nickname like '%待定%' 
+	 and language='${oriLanguage}' 
+	</select>
+	
+	<select id="findTermByid" parameterType="int" resultType="com.aiTrans.entity.TermTableListFormMap">
+	 select * from termTableListD where id=#{id}
+	</select>
+	
+	<!-- 根据语言查找对应的审核人员 -->
+	<select id="findAuditernickname" parameterType="com.aiTrans.entity.TermTableListFormMap" resultType="int">
+	 select id from auditorD where nickname like '%待定%' and language='${oriLanguage}'
+	</select>
+	
+	<!-- 查询校对员信息 -->
+	<select id="findProofreadLanguage" parameterType="com.aiTrans.entity.TermTableListFormMap" resultType="com.aiTrans.entity.ProofreaderFormMap">
+	select proofreaderD.* from proofreaderD where language='${oriLanguage}'
+    </select>
+    
+  <!--   根据名字查询领域id -->
+	<select id="findDomainName"  parameterType="com.aiTrans.entity.TermTableListFormMap" resultType="int">
+	SELECT id from domainD where name='${domainName}'
+	</select>
+	
+	<!-- 查询审核员信息 -->
+	<select id="findAuditerLanguage" parameterType="com.aiTrans.entity.TermTableListFormMap" resultType="com.aiTrans.entity.AuditorFormMap" >
+	 select auditorD.* from auditorD  where language='${oriLanguage}'
+	</select>
+	
+	
+	<!-- 查询译员信息 -->
+	<select id="findTranslatorLanguage" parameterType="com.aiTrans.entity.TermTableListFormMap"  resultType="com.aiTrans.entity.TranslatorFormMap" >
+	 select 
+		id,nickname
+		from translatorD where 
+		language = '${oriLanguage}' and domain like '%${domain}%'
+	 
+	</select>
+	
+	<!-- 查询领域 -->  
+	<select id="findDomain"  resultType="com.aiTrans.entity.TermTableListFormMap">
+	  select name,id  from domainD  
+	</select>
+	
+	<!-- 2017年4月17日11:43:14  -->
+	<select id="lookTermNameById" parameterType="String" resultType="String">
+		select termTableListD.termName from termTableListD where id=#{id}
+	</select> 
+	
+	<delete id="deleteById">
+	delete from termTableListD where id=#{id}
+	</delete>
+	
+    <!-- 查找主外表有无相同字段 -->
+    <select id="findForeignKey" parameterType="com.aiTrans.entity.TermTableListFormMap"  resultType="int" >
+    SELECT
+	COUNT (TermId) as total
+    FROM
+	termTableD,termTableListD
+    WHERE
+	termTableD.TermId = termTableListD.id
+    AND termTableListD.id =#{id}
+	</select>
+    
+    
+    
+    
+</mapper>

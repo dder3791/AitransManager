@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" 
+    "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.aiTrans.mapper.UserLoginMapper">
+	<!--mybatis ehcache缓存配置 -->
+	<!-- 以下两个<cache>标签二选一,第一个可以输出日志,第二个不输出日志 <cache type="org.mybatis.caches.ehcache.LoggingEhcache" 
+		/> -->
+	<!-- <cache type="org.mybatis.caches.ehcache.EhcacheCache"/> -->
+	<!-- 以下与实体类的中字段一致 -->
+	<sql id="selectId">
+		id,
+		accountName,
+		loginTime,
+		loginIP
+	</sql>
+
+	<select id="findOnlineUserPage" resultType="com.aiTrans.entity.UserLoginFormMap">
+		select
+		<include refid="selectId" />
+		from userLoginD
+		order by loginTime asc
+		<if test="accountName != null and accountName != ''">
+		and accountName like '%${accountName}%'
+		</if>
+	</select>
+<!-- 	<select id="findOnlineUserPage" resultType="com.aiTrans.entity.UserLoginFormMap">
+		select
+		<include refid="selectId" />
+		from ly_userLogin
+		where accountName='admin' or accountName='why'
+		order by loginTime desc
+		<if test="accountName != null and accountName != ''">
+		and accountName like '%${accountName}%'
+		</if>
+	</select> -->
+	
+	
+</mapper>

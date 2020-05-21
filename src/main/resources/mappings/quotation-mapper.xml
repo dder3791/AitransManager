@@ -1,0 +1,66 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" 
+    "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.aiTrans.mapper.QuotationMapper">
+	<update id="editToTrans" parameterType="com.aiTrans.entity.QuotationFormMap">
+		update quotationD set 
+		<if test="tranlevels!=null and tranlevels!=''">
+			tranlevels=#{tranlevels}
+			,applyStateT=#{applyStateT}
+		</if>
+		<if test="proolevels!=null and proolevels!=''">
+			proolevels=#{proolevels}
+			,applyStateP=#{applyStateP}
+		</if>
+		<if test="auditlevels!=null and auditlevels!=''">
+			auditlevels=#{auditlevels}
+			,applyStateA=#{applyStateA}
+		</if>
+		where transtionId=#{transtionId} and domain=#{domain} and languages=#{languages}
+	</update>
+	
+	<select id="queryByTransId" parameterType="string" resultType="com.aiTrans.entity.TranslatorFormMap">
+		select * from quotationD where transtionId=#{id}
+	</select>
+	
+	<select id="queryByDomLanLev"  parameterType="com.aiTrans.entity.QuotationFormMap" resultType="com.aiTrans.entity.QuotationFormMap">
+		select * from quotationD where 1=1 
+		<if test="transtionId!=null and transtionId!=''">
+			and transtionId=#{transtionId}
+		</if>
+		<if test="domain!=null and domain!=''">
+			and domain=#{domain}
+		</if>
+		<if test="languages!=null and languages!=''">
+			and languages=#{languages}
+		</if>
+	</select>
+	<insert id="insertPrice" parameterType="com.aiTrans.entity.QuotationFormMap" >
+		insert into quotationD  (tranPrice,prooPrice,dayTrans,languages,transtionId,domain)
+		values(#{tranPrice},#{prooPrice},#{dayTrans},#{languages},#{transtionId},#{domain})
+	</insert>
+	<delete id="delPrice" parameterType="java.lang.String">
+          DELETE FROM quotationD WHERE id in
+        <foreach collection="array" item="id" open="(" separator="," close=")">
+            #{id}
+        </foreach>
+    </delete>
+      <update id="updatePrice" parameterType="com.aiTrans.entity.QuotationFormMap">
+		update quotationD 
+		<trim prefix="set" suffixOverrides=",">
+			<if test="tranPrice!=null and tranPrice!=''">
+				tranPrice=#{tranPrice},
+			</if>
+			<if test="prooPrice!=null and prooPrice!=''">
+				prooPrice=#{prooPrice},
+			</if>
+			<if test="dayTrans!=null and dayTrans!=''">
+				dayTrans=#{dayTrans},
+			</if>
+			<if test="languages!=null and languages!=''">
+				languages=#{languages},
+			</if>
+		</trim>
+		where id=#{id} 
+	</update>
+</mapper>

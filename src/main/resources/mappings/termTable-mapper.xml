@@ -1,0 +1,69 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" 
+    "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.aiTrans.mapper.TermTableMapper">
+    
+    <sql id="selectId">
+		termTableD.id,
+		termTableD.TermOrigin,
+		termTableD.TermTarget,
+		termTableD.Uploader,
+		termTableD.TermId
+	</sql>
+   <!-- 查找二级目录 -->
+   <select id="findterms" resultType="com.aiTrans.entity.TermTableFormMap" parameterType="com.aiTrans.entity.TermTableFormMap">
+     select 
+    termTableD.id,
+		termTableD.TermOrigin,
+		termTableD.TermTarget,
+		termTableD.Uploader,
+		termTableD.UploadTime,
+		domainD.name,
+		termTableListD.termName,
+		UseInfoD.User_UC
+     from termTableD,domainD,termTablelistD,UseInfoD
+     where 
+        termTableD.domainId=domainD.id and 
+		termTableD.User_UC=UseInfoD.id and 
+		termTableD.TermId=termTablelistD.id
+    <if test="TermId!=null || TermId!=''">
+    	and  TermId='${termId}'
+    </if>
+    <if test="TermOrigin != null and TermOrigin != ''">
+		and TermOrigin like '%${TermOrigin}%'
+	 </if>
+	 <if test="TermTarget != null and TermTarget != ''">
+		and TermTarget like '%${TermTarget}%'
+	 </if>
+	 <if test="Uploader != null and Uploader != ''">
+		and Uploader like '%${Uploader}%'
+	 </if>
+	<if test="column != null">
+       order by ${column} ${sort}
+     </if>
+    </select>  
+    
+   <!--  添加原文与译文 -->
+    <insert id="savefile" parameterType="com.aiTrans.entity.TermTableFormMap" >
+     insert into termTableD (TermOrigin,TermTarget,Uploader,TermId,DomainId,User_UC,UploadTime) values(#{TermOrigin},#{TermTarget},#{Uploader},#{TermId},#{DomainId},#{User_UC},getDate())
+    </insert>
+   <!--  修改原文与译文信息 -->
+     <update id="updatefile" parameterType="com.aiTrans.entity.CorpusTableFormMap">
+		update termTableD set TermOrigin=#{TermOrigin},TermTarget=#{TermTarget},Uploader=#{Uploader},DomainId=#{DomainId},User_UC=#{User_UC},UploadTime=getDate() where id=#{id}
+    </update>
+    
+    <!-- 导出txt -->
+    <select id="exporttxt" resultType="com.aiTrans.entity.TermTableFormMap" parameterType="com.aiTrans.entity.TermTableFormMap">
+    select TermOrigin ,TermTarget from termTableD where termId='${termId}'
+    </select>
+    
+     <!-- 根据id查询 -->
+    <select id="findByid" parameterType="com.aiTrans.entity.TermTableFormMap" resultType="com.aiTrans.entity.TermTableFormMap">
+     select * from termTableD where id=#{id}
+    </select>
+    
+   <!--  查询所有原文与译文 -->
+    <select id="queryByAll" parameterType="com.aiTrans.entity.TermTableFormMap" resultType="com.aiTrans.entity.TermTableFormMap">
+    select TermOrigin,TermTarget from termTableD
+    </select>
+</mapper>

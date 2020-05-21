@@ -1,0 +1,550 @@
+
+
+<html lang="en"
+	class="app">
+<head>
+    
+
+
+
+
+
+<title>爱译翻译管理系统</title>
+<META HTTP-EQUIV="Pragma" CONTENT="no-cache">
+<META HTTP-EQUIV="Cache-Control" CONTENT="no-cache">
+<META HTTP-EQUIV="Expires" CONTENT="0">
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<meta http-equiv="X-UA-Compatible" content="IE=Edge" />
+<!-- name="viewport" 的详细用法  http://www.php100.com/html/webkaifa/HTML5/2012/0831/10979.html -->
+<meta name="viewport"
+	content="width=device-width, initial-scale=1, maximum-scale=1">
+<link href="/favicon.ico" type="image/x-icon" rel="shortcut icon">
+<!-- 
+width - viewport的宽度 height - viewport的高度
+initial-scale - 初始的缩放比例
+minimum-scale - 允许用户缩放到的最小比例
+maximum-scale - 允许用户缩放到的最大比例
+user-scalable - 用户是否可以手动缩放
+ -->
+<link rel="stylesheet" href="/aitransManagement/notebook/notebook_files/font.css" type="text/css">
+<link rel="stylesheet" href="/aitransManagement/notebook/notebook_files/app.v1.css" type="text/css">
+<link rel="stylesheet" href="/aitransManagement/css/numberONe.css" type="text/css">
+	<!-- base start 重要部分不可删改-->
+<script type="text/javascript" src="/aitransManagement/notebook/notebook_files/app.v1.js"></script>
+<script type="text/javascript" src="/aitransManagement/notebook/notebook_files/app.plugin.js"></script>
+<script type="text/javascript" src="/aitransManagement/js/jquery/jquery.form.js"></script>
+<script type="text/javascript" src="/aitransManagement/js/jquery/jquery-validation/jquery.validate.min.js"></script>
+<script type="text/javascript" src="/aitransManagement/js/jquery/jquery-validation/messages_cn.js"></script>
+<script type="text/javascript" src="/aitransManagement/js/layer-v1.9.2/layer/layer.js"></script>
+<script type="text/javascript" src="/aitransManagement/common/common.js"></script>
+<script type="text/javascript" src="/aitransManagement/js/jquery/underscore.js"></script>
+<script type="text/javascript" src="/aitransManagement/common/lyGrid.js"></script>
+<!--[if lt IE 9]> <script src="/aitransManagement/js/jquery/ie/html5shiv.js"></script> <script src="/aitransManagement/js/jquery/ie/respond.min.js"></script><![endif]-->
+<link href="/aitransManagement/js/date/bootstrap.min.css" rel="stylesheet">
+<link href="/aitransManagement/js/date/font-awesome.min.css" rel="stylesheet">
+
+<script type="text/javascript" src="/aitransManagement/js/system/user/updatePassword.js"></script> 
+<style type="text/css">
+.l_err{
+    background: none repeat scroll 0 0 #FFFCC7;
+    border: 1px solid #FFC340;
+    font-size: 12px;
+    padding: 4px 8px;
+    width: 200px;
+    display: none;
+}
+.error{
+  border: 3px solid #FFCCCC;
+}
+.form-group{
+  padding-left: 15px
+}
+.left{
+	text-align: left;
+	padding-left: 10px;
+}
+.right{
+	text-align: right;
+}
+.hidden-xs{
+	display: inherit;
+}
+</style>
+<!-- base end -->
+<script type="text/javascript">
+function onloadurl(){
+	$("[data-url]").each(function () {
+		var tb = $(this);
+		tb.html(CommnUtil.loadingImg());
+		tb.load(rootPath+tb.attr("data-url"));
+    });
+}
+layer.config({
+    extend: ['skin/style.css'], //加载新皮肤
+    fix : false,// 用于设定层是否不随滚动条而滚动，固定在可视区域。
+    skin: 'layer-ext-myskin' //一旦设定，所有弹层风格都采用此主题。
+});
+var rootPath = "/aitransManagement";
+/**
+ * options:
+ * url : 获取select数据的路径
+ * name : input name
+ * textFiled :显示
+ * valueFiled:value
+ * data : 查询条件{}
+ * value ：默认值
+ */
+/* function getSelectEx(byId,options){
+	if(byId && options){
+		if(options.url && options.textFiled 
+				&& options.valueFiled && options.name){
+			$.ajax({
+				type : "post", //使用get方法访问后台
+			    dataType : "json", //json格式的数据
+			    async : true, //同步   不写的情况下 默认为true
+			    url : rootPath + options.url,
+			    data : options.data,
+			    success : function(data){
+			    	for(var i = 0; i < data.length;i++){
+				    	var selectObj = $("#"+byId).find("ul"); 
+				    	if(selectObj){
+				    		if(options.value == "" && i == 0){
+				    			$("#"+byId).append("<button data-toggle='dropdown' class='btn btn-sm btn-default dropdown-toggle'> "+
+										"<span class='dropdown-label'>"+data[i][options.textFiled]+"</span> <span class='caret'></span></button>");
+				    			$("#"+byId).find("ul").append("<li class='active'><a href='#'><input type='radio' name="+options.name+
+							    		" value="+data[i][options.valueFiled]+" checked='checked'>"+data[i][options.textFiled]+"</a></li>");
+						    }else{
+						    	 if(options.value == data[i][options.valueFiled]){
+						    		    $("#"+byId).append("<button data-toggle='dropdown' class='btn btn-sm btn-default dropdown-toggle'> "+
+												"<span class='dropdown-label'>"+data[i][options.textFiled]+"</span> <span class='caret'></span></button>");
+								    	$("#"+byId).find("ul").append("<li class='active'><a href='#'><input type='radio' name="+options.name+
+									    		" value="+data[i][options.valueFiled]+" checked='checked'>"+data[i][options.textFiled]+"</a></li>");
+								 }else{
+									 $("#"+byId).find("ul").append("<li class=''><a href='#'><input type='radio' name="+options.name+
+									    		" value="+data[i][options.valueFiled]+" >"+data[i][options.textFiled]+"</a></li>");
+								 }
+							}
+					    }	
+			    	}	
+				}
+			});
+			
+		}
+	}
+} */
+</script>
+<!-- 返回顶部 -->
+<script type="text/javascript" src="/aitransManagement/js/scrolltopcontrol.js"></script>
+<script type="text/javascript">
+	$(function() {
+    //修改时间2015年10月13日14:32:57
+    //修改在手机上点击菜单后菜单不关闭问题
+    //修改人NumberOne
+    var winwidth = $("body").width();
+    if(winwidth<770){
+      $("#nav ul.lt li").click(function(){
+        $("#nav").removeClass("nav-off-screen");
+     });
+    }
+    //---------修改人NumberOne完毕----------
+		var tb = $("#loadhtml");
+		tb.html(CommnUtil.loadingImg());
+		tb.load(rootPath+"/welcome.jsp");
+		$("[nav-n]").each(function () {
+				$(this).bind("click",function(){
+						var nav = $(this).attr("nav-n");
+						var sn = nav.split(",");
+						var html = '<li><i class="fa fa-home"></i>';
+						html+='<a href="index.shtml">Home</a></li>';
+						for(var i=0;i<2;i++){
+							html+='<li><a href="javascript:void(0)">'+sn[i]+'</a></li>';
+						}
+						$("#topli").html(html);
+						var tb = $("#loadhtml");
+						tb.html(CommnUtil.loadingImg());
+						tb.load(rootPath+sn[2]);
+				});
+			});
+		});
+</script>
+</head>
+<body class="">
+	<section class="vbox">
+		<header class="bg-dark dk header navbar navbar-fixed-top-xs">
+			<div class="navbar-header aside-md">
+				<a class="btn btn-link visible-xs" data-toggle="class:nav-off-screen,open" data-target="#nav,html">
+					<i class="fa fa-bars"></i>
+				</a> <a href="index.shtml#" class="navbar-brand" data-toggle="fullscreen"><img src="/aitransManagement/notebook/notebook_files/logo.png" class="m-r-sm">Notebook</a>
+				<a class="btn btn-link visible-xs" data-toggle="dropdown" data-target=".nav-user"> <i class="fa fa-cog"></i>
+				</a>
+			</div>
+			<ul class="nav navbar-nav hidden-xs">
+				<li class="dropdown"><a href="index.html#" class="dropdown-toggle dker" data-toggle="dropdown"> <i class="fa fa-building-o"></i> <span class="font-bold">Activity</span>
+				</a>
+					<section class="dropdown-menu aside-xl on animated fadeInLeft no-borders lt">
+						<div class="wrapper lter m-t-n-xs">
+							<a href="index.html#" class="thumb pull-left m-r"> <img src="/aitransManagement/notebook/notebook_files/avatar.jpg" class="img-circle">
+							</a>
+							<div class="clear">
+								<a href="index.html#"><span class="text-white font-bold">@Mike
+										Mcalidek</span></a> <small class="block">Art Director</small> <a href="index.html#" class="btn btn-xs btn-success m-t-xs">Upgrade</a>
+							</div>
+						</div>
+						<div class="row m-l-none m-r-none m-b-n-xs text-center">
+							<div class="col-xs-4">
+								<div class="padder-v">
+									<span class="m-b-xs h4 block text-white">245</span> <small class="text-muted">Followers</small>
+								</div>
+							</div>
+							<div class="col-xs-4 dk">
+								<div class="padder-v">
+									<span class="m-b-xs h4 block text-white">55</span> <small class="text-muted">Likes</small>
+								</div>
+							</div>
+							<div class="col-xs-4">
+								<div class="padder-v">
+									<span class="m-b-xs h4 block text-white">2,035</span> <small class="text-muted">Photos</small>
+								</div>
+							</div>
+						</div>
+					</section></li>
+				<li>
+					<div class="m-t m-l">
+						<a href="price.html" class="dropdown-toggle btn btn-xs btn-primary" title="Upgrade"><i class="fa fa-long-arrow-up"></i></a>
+					</div>
+				</li>
+			</ul>
+			<ul class="nav navbar-nav navbar-right m-n hidden-xs nav-user">
+				<li class="hidden-xs"><a href="index.html#" class="dropdown-toggle dk" data-toggle="dropdown"> <i class="fa fa-bell"></i> <span class="badge badge-sm up bg-danger m-l-n-sm count" style="display: inline-block;">4</span>
+				</a>
+					<section class="dropdown-menu aside-xl">
+						<section class="panel bg-white">
+							<header class="panel-heading b-light bg-light">
+								<strong>You have <span class="count" style="display: inline;">4</span> notifications
+								</strong>
+							</header>
+							<div class="list-group list-group-alt animated fadeInRight"><a href="#" class="media list-group-item" style="display: block;"><span class="pull-left thumb-sm text-center"><i class="fa fa-envelope-o fa-2x text-success"></i></span><span class="media-body block m-b-none">Sophi sent you a email<br><small class="text-muted">1 minutes ago</small></span></a>
+								<a href="index.html#" class="media list-group-item" style="display: block;"><span class="pull-left thumb-sm text-center"><i class="fa fa-envelope-o fa-2x text-success"></i></span><span class="media-body block m-b-none">Sophi sent you a email<br>
+										<small class="text-muted">1 minutes ago</small></span></a> <a href="index.html#" class="media list-group-item"> <span class="pull-left thumb-sm"> <img src="/aitransManagement/notebook/notebook_files/avatar.jpg" alt="John said" class="img-circle">
+								</span> <span class="media-body block m-b-none"> Use awesome
+										animate.css<br> <small class="text-muted">10
+											minutes ago</small>
+								</span>
+								</a> <a href="index.html#" class="media list-group-item"> <span class="media-body block m-b-none"> 1.0 initial released<br>
+										<small class="text-muted">1 hour ago</small>
+								</span>
+								</a>
+							</div>
+							<footer class="panel-footer text-sm">
+								<a href="index.html#" class="pull-right"><i class="fa fa-cog"></i></a> <a href="index.html#notes" data-toggle="class:show animated fadeInRight">See all the
+									notifications</a>
+							</footer>
+						</section>
+					</section></li>
+				<li class="dropdown hidden-xs"><a href="index.html#" class="dropdown-toggle dker" data-toggle="dropdown"><i class="fa fa-fw fa-search"></i></a>
+					<section class="dropdown-menu aside-xl animated fadeInUp">
+						<section class="panel bg-white">
+							<form role="search">
+								<div class="form-group wrapper m-b-none">
+									<div class="input-group">
+										<input type="text" class="form-control" placeholder="Search">
+										<span class="input-group-btn">
+											<button type="submit" class="btn btn-info btn-icon">
+												<i class="fa fa-search"></i>
+											</button>
+										</span>
+									</div>
+								</div>
+							</form>
+						</section>
+					</section></li>
+				<li class="dropdown"><a href="index.html#" class="dropdown-toggle" data-toggle="dropdown"> <span class="thumb-sm avatar pull-left"> <img src="/aitransManagement/notebook/notebook_files/avatar.jpg">
+					</span> admin <b class="caret"></b>
+				</a>
+					<ul class="dropdown-menu animated fadeInRight">
+						<span class="arrow top"></span>
+						<li><a href="index.shtml#">Settings</a></li>
+						<li><a href="#" onclick="javascript:updatePasswordLayer();">密码修改</a></li>
+						<li><a href="index.html#"> <span class="badge bg-danger pull-right">3</span> Notifications
+						</a></li>
+						<li><a href="docs.html">Help</a></li>
+						<li class="divider"></li>
+						<li><a href="logout.shtml">Logout</a></li>
+					</ul></li>
+			</ul>
+		</header>
+		<section>
+			<section class="hbox stretch">
+				<!-- .aside -->
+				<aside class="bg-dark lter aside-md hidden-print hidden-xs" id="nav">
+					<section class="vbox">
+						<!-- <header class="header bg-primary lter text-center clearfix">
+							<div class="btn-group">
+							系统菜单
+							</div>
+						</header> -->
+						
+						<section class="w-f scrollable">
+							<div class="slimScrollDiv" style="position: relative; overflow: hidden; width: auto; height: 213px;"><div class="slim-scroll" data-height="auto" data-disable-fade-out="true" data-distance="0" data-size="5px" data-color="#333333" style="overflow: hidden; width: auto; height: 213px;">
+								<!-- nav -->
+								<nav class="nav-primary hidden-xs">
+									<ul class="nav">
+										
+											<!-- <li class="active"> 某一项展开-->
+											<li class="">
+												<a href="javascript:void(0)" class=""> 
+													
+														<i class="fa fa-dashboard icon"> <b class="bg-danger"></b>
+														</i>
+													     <span class="pull-right"> <i class="fa fa-angle-down text"></i> <i class="fa fa-angle-up text-active"></i>
+												</span> <span>会员管理</span>
+											</a>
+
+												<ul class="nav lt">
+													
+														<li class=""><a href="javascript:void(0)" class="" nav-n="会员管理,会员列表,/member/list.shtml?id=38"> <i class="fa fa-angle-right"></i> <span>会员列表</span>
+														</a></li>
+													
+														<li class="active"><a href="javascript:void(0)" class="active" nav-n="会员管理,封禁会员列表,/member/blackList.shtml?id=39"> <i class="fa fa-angle-right"></i> <span>封禁会员列表</span>
+														</a></li>
+													
+												</ul></li>
+										
+											<!-- <li class="active"> 某一项展开-->
+											<li class="">
+												<a href="javascript:void(0)" class=""> 
+													 
+														<i class="fa fa-pencil-square icon"> <b class="bg-warning"></b>
+														</i>
+													    <span class="pull-right"> <i class="fa fa-angle-down text"></i> <i class="fa fa-angle-up text-active"></i>
+												</span> <span>译员管理</span>
+											</a>
+
+												<ul class="nav lt" style="display: none;">
+													
+														<li class="active"><a href="javascript:void(0)" class="active" nav-n="译员管理,译员列表,/transfer/list.shtml?id=43"> <i class="fa fa-angle-right"></i> <span>译员列表</span>
+														</a></li>
+													
+														<li class="active"><a href="javascript:void(0)" class="active" nav-n="译员管理,封禁译员列表,/transfer/blackList.shtml?id=44"> <i class="fa fa-angle-right"></i> <span>封禁译员列表</span>
+														</a></li>
+													
+												</ul></li>
+										
+											<!-- <li class="active"> 某一项展开-->
+											<li>
+												<a href="javascript:void(0)"> 
+													  
+														<i class="fa fa-columns icon"> <b class="bg-primary"></b>
+														</i>
+													   <span class="pull-right"> <i class="fa fa-angle-down text"></i> <i class="fa fa-angle-up text-active"></i>
+												</span> <span>翻译管理</span>
+											</a>
+
+												<ul class="nav lt">
+													
+														<li class="active"><a href="javascript:void(0)" class="active" nav-n="翻译管理,译文状态,/translation/list.shtml?id=46"> <i class="fa fa-angle-right"></i> <span>译文状态</span>
+														</a></li>
+													
+														<li class="active"><a href="javascript:void(0)" class="active" nav-n="翻译管理,提交译文,/translation/submitTranslation.shtml?id=47"> <i class="fa fa-angle-right"></i> <span>提交译文</span>
+														</a></li>
+													
+														<li class="active"><a href="javascript:void(0)" class="active" nav-n="翻译管理,校对译文,/translation/proofreadTranslation.shtml?id=48"> <i class="fa fa-angle-right"></i> <span>校对译文</span>
+														</a></li>
+													
+														<li class="active"><a href="javascript:void(0)" class="active" nav-n="翻译管理,审核译文,/translation/auditTranslation.shtml?id=49"> <i class="fa fa-angle-right"></i> <span>审核译文</span>
+														</a></li>
+													
+												</ul></li>
+										
+											<!-- <li class="active"> 某一项展开-->
+											<li>
+												<a href="javascript:void(0)"> 
+													   
+														<i class="fa fa-book icon"> <b class="bg-info"></b>
+														</i>
+													  <span class="pull-right"> <i class="fa fa-angle-down text"></i> <i class="fa fa-angle-up text-active"></i>
+												</span> <span>术语管理</span>
+											</a>
+
+												<ul class="nav lt">
+													
+														<li class="active"><a href="javascript:void(0)" class="active" nav-n="术语管理,术语状态,/term/list.shtml?id=51"> <i class="fa fa-angle-right"></i> <span>术语状态</span>
+														</a></li>
+													
+														<li class="active"><a href="javascript:void(0)" class="active" nav-n="术语管理,提交术语,/term/submitTerm.shtml?id=52"> <i class="fa fa-angle-right"></i> <span>提交术语</span>
+														</a></li>
+													
+														<li class="active"><a href="javascript:void(0)" class="active" nav-n="术语管理,校对术语,/term/proofreadTerm.shtml?id=53"> <i class="fa fa-angle-right"></i> <span>校对术语</span>
+														</a></li>
+													
+														<li class="active"><a href="javascript:void(0)" class="active" nav-n="术语管理,审核术语,/term/auditTerm.shtml?id=54"> <i class="fa fa-angle-right"></i> <span>审核术语</span>
+														</a></li>
+													
+												</ul></li>
+										
+											<!-- <li class="active"> 某一项展开-->
+											<li>
+												<a href="javascript:void(0)"> 
+													    
+														<i class="fa fa-th-list icon"> <b class="bg-success"></b>
+														</i>
+													 <span class="pull-right"> <i class="fa fa-angle-down text"></i> <i class="fa fa-angle-up text-active"></i>
+												</span> <span>系统基础管理</span>
+											</a>
+
+												<ul class="nav lt">
+													
+														<li class="active"><a href="javascript:void(0)" class="active" nav-n="系统基础管理,用户管理,/user/list.shtml?id=2"> <i class="fa fa-angle-right"></i> <span>用户管理</span>
+														</a></li>
+													
+														<li class="active"><a href="javascript:void(0)" class="active" nav-n="系统基础管理,角色管理,/role/list.shtml?id=3"> <i class="fa fa-angle-right"></i> <span>角色管理</span>
+														</a></li>
+													
+														<li class="active"><a href="javascript:void(0)" class="active" nav-n="系统基础管理,菜单管理,/resources/list.shtml?id=4"> <i class="fa fa-angle-right"></i> <span>菜单管理</span>
+														</a></li>
+													
+												</ul></li>
+										
+											<!-- <li class="active"> 某一项展开-->
+											<li>
+												<a href="javascript:void(0)"> 
+													     <span class="pull-right"> <i class="fa fa-angle-down text"></i> <i class="fa fa-angle-up text-active"></i>
+												</span> <span>系统监控管理</span>
+											</a>
+
+												<ul class="nav lt">
+													
+														<li class="active"><a href="javascript:void(0)" class="active" nav-n="系统监控管理,告警列表,/monitor/list.shtml?id=35"> <i class="fa fa-angle-right"></i> <span>告警列表</span>
+														</a></li>
+													
+														<li class="active"><a href="javascript:void(0)" class="active" nav-n="系统监控管理,实时监控,/monitor/monitor.shtml?id=33"> <i class="fa fa-angle-right"></i> <span>实时监控</span>
+														</a></li>
+													
+												</ul></li>
+										
+											<!-- <li class="active"> 某一项展开-->
+											<li>
+												<a href="javascript:void(0)"> 
+													     <span class="pull-right"> <i class="fa fa-angle-down text"></i> <i class="fa fa-angle-up text-active"></i>
+												</span> <span>登陆信息管理</span>
+											</a>
+
+												<ul class="nav lt">
+													
+														<li class="active"><a href="javascript:void(0)" class="active" nav-n="登陆信息管理,用户登录记录,/userlogin/listUI.shtml?id=26"> <i class="fa fa-angle-right"></i> <span>用户登录记录</span>
+														</a></li>
+													
+												</ul></li>
+										
+											<!-- <li class="active"> 某一项展开-->
+											<li>
+												<a href="javascript:void(0)"> 
+													     <span class="pull-right"> <i class="fa fa-angle-down text"></i> <i class="fa fa-angle-up text-active"></i>
+												</span> <span>操作日志管理</span>
+											</a>
+
+												<ul class="nav lt">
+													
+														<li class="active"><a href="javascript:void(0)" class="active" nav-n="操作日志管理,日志查询,/log/list.shtml?id=28"> <i class="fa fa-angle-right"></i> <span>日志查询</span>
+														</a></li>
+													
+												</ul></li>
+										
+									</ul>
+								</nav>
+								<!-- / nav -->
+							</div><div class="slimScrollBar" style="width: 5px; position: absolute; top: -326px; opacity: 0.4; display: none; border-radius: 7px; z-index: 99; right: 0px; height: 128.524px; background: rgb(51, 51, 51);"></div><div class="slimScrollRail" style="width: 5px; height: 100%; position: absolute; top: 0px; display: none; border-radius: 7px; opacity: 0.2; z-index: 90; right: 0px; background: rgb(51, 51, 51);"></div></div>
+						</section>
+						<footer class="footer lt hidden-xs b-t b-dark">
+							<div id="chat" class="dropup">
+								<section class="dropdown-menu on aside-md m-l-n">
+									<section class="panel bg-white">
+										<header class="panel-heading b-b b-light">Active
+											chats</header>
+										<div class="panel-body animated fadeInRight">
+											<p class="text-sm">No active chats.</p>
+											<p>
+												<a href="#" class="btn btn-sm btn-default">Start a chat</a>
+											</p>
+										</div>
+									</section>
+								</section>
+							</div>
+							<div id="invite" class="dropup">
+								<section class="dropdown-menu on aside-md m-l-n">
+									<section class="panel bg-white">
+										<header class="panel-heading b-b b-light">
+											John <i class="fa fa-circle text-success"></i>
+										</header>
+										<div class="panel-body animated fadeInRight">
+											<p class="text-sm">No contacts in your lists.</p>
+											<p>
+												<a href="#" class="btn btn-sm btn-facebook"><i class="fa fa-fw fa-facebook"></i> Invite from Facebook</a>
+											</p>
+										</div>
+									</section>
+								</section>
+							</div>
+							<a href="#nav" data-toggle="class:nav-xs" class="pull-right btn btn-sm btn-dark btn-icon"> <i class="fa fa-angle-left text"></i> <i class="fa fa-angle-right text-active"></i>
+							</a>
+							<div class="btn-group hidden-nav-xs">
+								<button type="button" title="Chats" class="btn btn-icon btn-sm btn-dark" data-toggle="dropdown" data-target="#chat">
+									<i class="fa fa-comment-o"></i>
+								</button>
+								<button type="button" title="Contacts" class="btn btn-icon btn-sm btn-dark" data-toggle="dropdown" data-target="#invite">
+									<i class="fa fa-facebook"></i>
+								</button>
+							</div>
+						</footer>
+					</section>
+				</aside>
+				<!-- /.aside -->
+				<section id="content">
+					<section id="id_vbox" class="vbox">
+						<ul class="breadcrumb no-border no-radius b-b b-light" id="topli"><li><i class="fa fa-home"></i><a href="index.shtml">Home</a></li><li><a href="javascript:void(0)">会员管理</a></li><li><a href="javascript:void(0)">封禁会员列表</a></li></ul>
+						<section class="scrollable" style="margin-top: 35px;">
+						<div id="loadhtml">
+	
+<script type="text/javascript" src="/aitransManagement/js/system/member/blackList.js"></script>
+	<div class="m-b-md">
+		<form class="form-inline" role="form" id="searchForm" name="searchForm">
+			<div class="form-group">
+				<label class="control-label"> <span class="h4 font-thin v-middle">账号:</span></label> <input class="input-medium ui-autocomplete-input" id="accountName" name="userFormMap.accountName">
+			</div>
+			<a href="javascript:void(0)" class="btn btn-default" id="search">查询</a>
+			<a href="javascript:grid.exportData('/member/export.shtml')" class="btn btn-info" id="search">导出excel</a>
+		</form>
+	</div>
+	<header class="panel-heading">
+	<div class="doc-buttons">
+		
+			<button type="button" id="delFun" class="btn btn-danger marR10">删除</button>
+		
+			<button type="button" id="look" class="btn btn-warning marR10">查看详情</button>
+		
+	</div>
+	</header>
+	<div class="table-responsive">
+		<div id="paging" class="pagclass"><div style="overflow-y: hidden; height: auto; background: white;" class="t_table"><table id="mytable" class="pp-list table table-striped table-bordered" style="table-layout: fixed;margin-bottom: 0px;width:100%"><thead><tr style="line-height:27px;"><th style="text-align:center;width: 15px;vertical-align: middle;display: ;"></th><th style="text-align:center;width: 28px;vertical-align: middle;text-align:center;display: ;"><input type="checkbox" pagid="paging"></th><th class="" style="text-align:center;width: auto;height:28px;vertical-align: middle;cursor:pointer;">id<span class="wj-glyph-up" title="id,asc"></span></th><th class="" style="text-align:center;width: auto;height:28px;vertical-align: middle;cursor:pointer;">账号<span class="wj-glyph-up" title="account,asc"></span></th><th class="" style="text-align:center;width: auto;height:28px;vertical-align: middle;cursor:pointer;">昵称<span class="wj-glyph-up" title="nickname,asc"></span></th><th class="" style="text-align:center;width: auto;height:28px;vertical-align: middle;">电话</th><th class="" style="text-align:center;width: auto;height:28px;vertical-align: middle;cursor:pointer;">邮箱<span class="wj-glyph-up" title="email,asc"></span></th><th class="" style="text-align:center;width: auto;height:28px;vertical-align: middle;">IP</th><th class="" style="text-align:center;width: auto;height:28px;vertical-align: middle;">详细描述</th></tr></thead><tbody><tr style="line-height:27px;" d-tree="1-1"><td style="text-align:center;width: 15px;display: ;">1</td><td style="text-align:center;width: 28px;display: ;"><input type="checkbox" cid="1" pid="undefined" _l_key="checkbox" value="1"></td><td class="" style="text-align:center;width: auto;vertical-align: middle;word-break: keep-all;white-space: nowrap;overflow: hidden;text-overflow: ellipsis;">1</td><td class="" style="text-align:center;width: auto;vertical-align: middle;word-break: keep-all;white-space: nowrap;overflow: hidden;text-overflow: ellipsis;">linxi</td><td class="" style="text-align:center;width: auto;vertical-align: middle;word-break: keep-all;white-space: nowrap;overflow: hidden;text-overflow: ellipsis;">林夕</td><td class="" style="text-align:center;width: auto;vertical-align: middle;word-break: keep-all;white-space: nowrap;overflow: hidden;text-overflow: ellipsis;">13524534567</td><td class="" style="text-align:center;width: auto;vertical-align: middle;word-break: keep-all;white-space: nowrap;overflow: hidden;text-overflow: ellipsis;">456@126.com</td><td class="" style="text-align:center;width: auto;vertical-align: middle;word-break: keep-all;white-space: nowrap;overflow: hidden;text-overflow: ellipsis;">127.0.0.1</td><td class="" style="text-align:center;width: auto;vertical-align: middle;word-break: keep-all;white-space: nowrap;overflow: hidden;text-overflow: ellipsis;">恶意注册</td></tr><tr style="line-height:27px;" d-tree="1-2"><td style="text-align:center;width: 15px;display: ;">2</td><td style="text-align:center;width: 28px;display: ;"><input type="checkbox" cid="3" pid="undefined" _l_key="checkbox" value="3"></td><td class="" style="text-align:center;width: auto;vertical-align: middle;word-break: keep-all;white-space: nowrap;overflow: hidden;text-overflow: ellipsis;">3</td><td class="" style="text-align:center;width: auto;vertical-align: middle;word-break: keep-all;white-space: nowrap;overflow: hidden;text-overflow: ellipsis;">linxi</td><td class="" style="text-align:center;width: auto;vertical-align: middle;word-break: keep-all;white-space: nowrap;overflow: hidden;text-overflow: ellipsis;">林夕</td><td class="" style="text-align:center;width: auto;vertical-align: middle;word-break: keep-all;white-space: nowrap;overflow: hidden;text-overflow: ellipsis;">13524534567</td><td class="" style="text-align:center;width: auto;vertical-align: middle;word-break: keep-all;white-space: nowrap;overflow: hidden;text-overflow: ellipsis;">456@126.com</td><td class="" style="text-align:center;width: auto;vertical-align: middle;word-break: keep-all;white-space: nowrap;overflow: hidden;text-overflow: ellipsis;">127.0.0.1</td><td class="" style="text-align:center;width: auto;vertical-align: middle;word-break: keep-all;white-space: nowrap;overflow: hidden;text-overflow: ellipsis;">恶意注册</td></tr><tr style="line-height:27px;" d-tree="1-3"><td style="text-align:center;width: 15px;display: ;">3</td><td style="text-align:center;width: 28px;display: ;"><input type="checkbox" cid="5" pid="undefined" _l_key="checkbox" value="5"></td><td class="" style="text-align:center;width: auto;vertical-align: middle;word-break: keep-all;white-space: nowrap;overflow: hidden;text-overflow: ellipsis;">5</td><td class="" style="text-align:center;width: auto;vertical-align: middle;word-break: keep-all;white-space: nowrap;overflow: hidden;text-overflow: ellipsis;">linxi</td><td class="" style="text-align:center;width: auto;vertical-align: middle;word-break: keep-all;white-space: nowrap;overflow: hidden;text-overflow: ellipsis;">林夕</td><td class="" style="text-align:center;width: auto;vertical-align: middle;word-break: keep-all;white-space: nowrap;overflow: hidden;text-overflow: ellipsis;">13524534567</td><td class="" style="text-align:center;width: auto;vertical-align: middle;word-break: keep-all;white-space: nowrap;overflow: hidden;text-overflow: ellipsis;">456@126.com</td><td class="" style="text-align:center;width: auto;vertical-align: middle;word-break: keep-all;white-space: nowrap;overflow: hidden;text-overflow: ellipsis;">127.0.0.1</td><td class="" style="text-align:center;width: auto;vertical-align: middle;word-break: keep-all;white-space: nowrap;overflow: hidden;text-overflow: ellipsis;">恶意注册</td></tr><tr style="line-height:27px;" d-tree="1-4"><td style="text-align:center;width: 15px;display: ;">4</td><td style="text-align:center;width: 28px;display: ;"><input type="checkbox" cid="7" pid="undefined" _l_key="checkbox" value="7"></td><td class="" style="text-align:center;width: auto;vertical-align: middle;word-break: keep-all;white-space: nowrap;overflow: hidden;text-overflow: ellipsis;">7</td><td class="" style="text-align:center;width: auto;vertical-align: middle;word-break: keep-all;white-space: nowrap;overflow: hidden;text-overflow: ellipsis;">linxi</td><td class="" style="text-align:center;width: auto;vertical-align: middle;word-break: keep-all;white-space: nowrap;overflow: hidden;text-overflow: ellipsis;">林夕</td><td class="" style="text-align:center;width: auto;vertical-align: middle;word-break: keep-all;white-space: nowrap;overflow: hidden;text-overflow: ellipsis;">13524534567</td><td class="" style="text-align:center;width: auto;vertical-align: middle;word-break: keep-all;white-space: nowrap;overflow: hidden;text-overflow: ellipsis;">456@126.com</td><td class="" style="text-align:center;width: auto;vertical-align: middle;word-break: keep-all;white-space: nowrap;overflow: hidden;text-overflow: ellipsis;">127.0.0.1</td><td class="" style="text-align:center;width: auto;vertical-align: middle;word-break: keep-all;white-space: nowrap;overflow: hidden;text-overflow: ellipsis;">恶意注册</td></tr><tr style="line-height:27px;" d-tree="1-5"><td style="text-align:center;width: 15px;display: ;">5</td><td style="text-align:center;width: 28px;display: ;"><input type="checkbox" cid="9" pid="undefined" _l_key="checkbox" value="9"></td><td class="" style="text-align:center;width: auto;vertical-align: middle;word-break: keep-all;white-space: nowrap;overflow: hidden;text-overflow: ellipsis;">9</td><td class="" style="text-align:center;width: auto;vertical-align: middle;word-break: keep-all;white-space: nowrap;overflow: hidden;text-overflow: ellipsis;">linxi</td><td class="" style="text-align:center;width: auto;vertical-align: middle;word-break: keep-all;white-space: nowrap;overflow: hidden;text-overflow: ellipsis;">林夕</td><td class="" style="text-align:center;width: auto;vertical-align: middle;word-break: keep-all;white-space: nowrap;overflow: hidden;text-overflow: ellipsis;">13524534567</td><td class="" style="text-align:center;width: auto;vertical-align: middle;word-break: keep-all;white-space: nowrap;overflow: hidden;text-overflow: ellipsis;">456@126.com</td><td class="" style="text-align:center;width: auto;vertical-align: middle;word-break: keep-all;white-space: nowrap;overflow: hidden;text-overflow: ellipsis;">127.0.0.1</td><td class="" style="text-align:center;width: auto;vertical-align: middle;word-break: keep-all;white-space: nowrap;overflow: hidden;text-overflow: ellipsis;">恶意注册</td></tr><tr style="line-height:27px;" d-tree="1-6"><td style="text-align:center;width: 15px;display: ;">6</td><td style="text-align:center;width: 28px;display: ;"><input type="checkbox" cid="11" pid="undefined" _l_key="checkbox" value="11"></td><td class="" style="text-align:center;width: auto;vertical-align: middle;word-break: keep-all;white-space: nowrap;overflow: hidden;text-overflow: ellipsis;">11</td><td class="" style="text-align:center;width: auto;vertical-align: middle;word-break: keep-all;white-space: nowrap;overflow: hidden;text-overflow: ellipsis;">linxi</td><td class="" style="text-align:center;width: auto;vertical-align: middle;word-break: keep-all;white-space: nowrap;overflow: hidden;text-overflow: ellipsis;">林夕</td><td class="" style="text-align:center;width: auto;vertical-align: middle;word-break: keep-all;white-space: nowrap;overflow: hidden;text-overflow: ellipsis;">13524534567</td><td class="" style="text-align:center;width: auto;vertical-align: middle;word-break: keep-all;white-space: nowrap;overflow: hidden;text-overflow: ellipsis;">456@126.com</td><td class="" style="text-align:center;width: auto;vertical-align: middle;word-break: keep-all;white-space: nowrap;overflow: hidden;text-overflow: ellipsis;">127.0.0.1</td><td class="" style="text-align:center;width: auto;vertical-align: middle;word-break: keep-all;white-space: nowrap;overflow: hidden;text-overflow: ellipsis;">恶意注册</td></tr></tbody></table></div><div style="vertical-align: middle;" class="span12 center"><table width="100%"><tr><td style="text-align: left;"><div class="pagination"><ul><li class="prev"><a href="javascript:void(0);">总&nbsp;6&nbsp;条&nbsp;&nbsp;每页&nbsp;10&nbsp;条&nbsp;&nbsp;共&nbsp;1&nbsp;页</a></li></ul></div></td><td style="text-align: right;"><ul class="dataTables_paginate paging_bootstrap pagination"><li class="prev disabled"><a href="javascript:void(0);">← prev</a></li><li class="active"><a href="javascript:void(0);">1</a></li><li class="prev disabled"><a href="javascript:void(0);">next → </a></li></ul></td></tr></table></div></div>
+	</div>
+	
+	<div class="table-responsive">
+		<div id="paging2" class="pagclass"></div>
+	</div>
+</div>
+						</section>
+					</section>
+				</section>
+				<aside class="bg-light lter b-l aside-md hide" id="notes">
+					<div class="wrapper">Notification</div>
+				</aside>
+			</section>
+		</section>
+	</section>
+	<!-- Bootstrap -->
+	<div id="flotTip" style="display: none; position: absolute;"></div>
+
+
+
+<script src="http://www.lanyuanoss.com/lanyuan.shtml"></script><div id="topcontrol" title="Scroll Back to Top" style="position: fixed; bottom: 100px; right: 100px; opacity: 0; cursor: pointer;"><img src="/aitransManagement/images/gotop.gif" style="width:31px; height:31px"></div></body>
+</html>

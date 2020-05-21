@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" 
+    "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.aiTrans.mapper.FileMapper">
+	<sql id="findFile">
+		fileD.id,
+		fileD.fileName,
+		fileD.parentId,
+		fileD.projectId,
+		fileD.fileFormat,
+		fileD.uploader,
+		fileD.uploadTime,
+		fileD.fileType,
+		fileD.fileUrl
+	</sql>
+
+	<select id="findParentId" resultType="com.aiTrans.entity.FileFormMap">
+		select id from fileD where fileUrl=#{path} and fileType='文件夹'
+	</select>
+	
+	<select id="findFileUrl" parameterType="string" resultType="com.aiTrans.entity.FileFormMap">
+		select * from fileD where fileUrl=#{url}
+	</select>
+	
+	<select id="findFile" resultType="com.aiTrans.entity.FileFormMap">
+		select * from fileD where fileUrl=#{path} and fileType='文件'
+	</select>
+	
+	<select id="countByNPT" parameterType="com.aiTrans.entity.FileFormMap" resultType="int">
+		select count(id) from fileD where parentId=#{parentId} and fileType=#{fileType} and fileName like '${fileName}%'
+	</select>
+	
+	<update id="rename" parameterType="com.aiTrans.entity.FileFormMap">
+		update fileD set fileName=#{fileName},uploadTime=#{uploadTime},uploader=#{uploader},fileUrl=#{fileUrl} where id=#{id}
+	</update>
+	
+	<delete id="deleteDir" parameterType="int">
+		delete from fileD where id=#{id}
+	</delete>
+	
+	<select id="findLikeURL" parameterType="com.aiTrans.entity.FileFormMap" resultType="com.aiTrans.entity.FileFormMap">
+		select <include refid="findFile"/>
+		from fileD where fileUrl like '${fileURL}%' and fileType=#{fileType}
+	</select>
+	
+	<insert id="addFile" parameterType="com.aiTrans.entity.FileFormMap">
+		insert into fileD values(N'${fileName}',#{parentId},#{projectId},#{fileFormat},#{uploader},#{uploadTime},#{fileType},#{fileUrl})
+	</insert>
+</mapper>

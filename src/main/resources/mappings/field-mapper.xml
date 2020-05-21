@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" 
+    "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.aiTrans.mapper.FieldMapper">
+	
+	<select id="findFieldPage" resultType="com.aiTrans.entity.FieldFormMap" parameterType="com.aiTrans.entity.FieldFormMap">
+		select
+		fieldD.*
+		FROM fieldD
+		where 1=1
+		<if test="field!=null and field!=''">
+		and field like '%${field}%'
+		</if>
+		<if test="factor!=null and factor!=''">
+			and factor like '%${factor}%'
+		</if>
+		<if test="column != null">
+		order by ${column} ${sort}
+		</if>
+	</select>
+
+</mapper>

@@ -1,0 +1,80 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" 
+    "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.aiTrans.mapper.CorpusTableMapper">
+    
+    <sql id="selectId">
+        corpusTableD.id,
+		corpusTableD.CorpusOrigin,
+		corpusTableD.CorpusTarget,
+		corpusTableD.Uploader,
+		corpusTableD.UploadTime,
+		corpusTableD.DomainId,
+		corpusTableD.CorpusId,
+		corpusTableD.User_UC
+	</sql>
+	
+   <select id="findcorpus" resultType="com.aiTrans.entity.CorpusTableFormMap" parameterType="com.aiTrans.entity.CorpusTableFormMap">
+     select 
+    corpusTableD.id,
+		corpusTableD.CorpusOrigin,
+		corpusTableD.CorpusTarget,
+		corpusTableD.Uploader,
+		corpusTableD.UploadTime,
+		domainD.name,
+		corpusTableListD.corpusName,
+		UseInfoD.User_UC
+     from corpusTableD,domainD,corpusTablelistD,UseInfoD
+     where 
+        corpusTableD.domainId=domainD.id and 
+		corpusTableD.User_UC=UseInfoD.id and 
+		corpusTableD.CorpusId=corpusTableListD.id
+    <if test="corpusId!=null || corpusId!=''">
+    	and  corpusId='${corpusId}'
+    </if>
+    <if test="CorpusOrigin != null and CorpusOrigin != ''">
+		and CorpusOrigin like '%${CorpusOrigin}%'
+	 </if>
+	 <if test="CorpusTarget != null and CorpusTarget != ''">
+		and CorpusTarget like '%${CorpusTarget}%'
+	 </if>
+	 <if test="Uploader != null and Uploader != ''">
+		and Uploader like '%${Uploader}%'
+	 </if>
+	<if test="column != null">
+       order by ${column} ${sort}
+     </if>
+    </select>  
+    
+    <!-- <select id="findUser" parameterType="String" resultType="String">
+     select UseInfoD.User_UC from UseInfoD join corpusTableD  on  corpusTableD.User_UC=UseInfoD.id where UseInfoD.id='${id}'
+    </select> -->
+    <!-- 新增原文与译文信息 -->
+    <insert id="savefile" parameterType="com.aiTrans.entity.CorpusTableFormMap" >
+     insert into corpusTableD (CorpusOrigin,CorpusTarget,Uploader,CorpusId,DomainId,User_UC,UploadTime) values(#{CorpusOrigin},#{CorpusTarget},#{Uploader},#{CorpusId},#{DomainId},#{User_UC},getDate())
+    </insert>
+    
+    <!-- 修改原文与译文信息 -->
+     <update id="updatefile" parameterType="com.aiTrans.entity.CorpusTableFormMap">
+		update corpusTableD set CorpusOrigin=#{CorpusOrigin},CorpusTarget=#{CorpusTarget},Uploader=#{Uploader},DomainId=#{DomainId},User_UC=#{User_UC},UploadTime=getDate() where id=#{id}
+    </update>
+    
+    <!-- 导出txt原文与译文信息 -->
+    <select id="exporttxt" parameterType="com.aiTrans.entity.CorpusTableFormMap" resultType="com.aiTrans.entity.CorpusTableFormMap">
+    select CorpusOrigin,CorpusTarget from corpusTableD where corpusId='${corpusId}'
+    </select>
+    
+    <!-- 根据id查找领域 -->
+     <select id="finddomainId" parameterType="com.aiTrans.entity.CorpusTableFormMap" resultType="com.aiTrans.entity.CorpusTableFormMap">
+    select DomainId from corpusTableD where id='${corpusId}'
+    </select>
+    
+    <!-- 查询所有原文与译文 -->
+    <select id="queryByAll" parameterType="com.aiTrans.entity.CorpusTableFormMap" resultType="com.aiTrans.entity.CorpusTableFormMap">
+    select CorpusOrigin,CorpusTarget from corpusTableD
+    </select>
+   <!--  <foreach item="info" collection="infos" open="(" separator="," close=")">
+				#{info}
+		</foreach> -->
+    
+</mapper>

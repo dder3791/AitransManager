@@ -1,0 +1,189 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" 
+    "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.aiTrans.mapper.LibraryMapper">
+	<!--mybatis ehcache缓存配置 -->
+	<!-- 以下两个<cache>标签二选一,第一个可以输出日志,第二个不输出日志 <cache type="org.mybatis.caches.ehcache.LoggingEhcache" 
+		/> -->
+	<!-- <cache type="org.mybatis.caches.ehcache.EhcacheCache"/> -->
+	<!-- 以下与实体类的中字段一致 -->
+	<sql id="selectId">
+		id,
+		sourceText,
+		translation,
+		type,
+		remark
+	</sql>
+	<sql id="selectLibraryFirst">
+		id,
+		language,
+		name,
+		domain,
+		isProofread,
+		proofreader,
+		transType,
+		remark
+	</sql>
+	
+	<sql id="newLibrary">
+		id,
+		name,
+		language,
+		lexicalQuantity,
+		sentenceQuantity,
+		description
+	</sql>
+	
+	
+	<select id="findFirstPage" resultType="com.aiTrans.entity.LibraryFormMap">
+		select
+		<include refid="newLibrary" />
+		from libraryD
+		where id in
+		(select MIN(id) from libraryD where language='${language}' group by name)
+	</select>
+	
+	<!-- 2017年4月21日11:25:39 -->
+	<!-- <select id="findFirstPage" resultType="com.aiTrans.entity.LibraryFormMap">
+		select 
+		<include refid="selectLibraryFirst"/>
+		from libraryD
+		where 1=1 and language='${language}'
+		<if test="account != null and account != ''">
+		and account like '%${account}%'
+		</if>
+		<if test="column != null">
+	         order by ${column} ${sort}
+	       </if>
+	</select> -->
+	
+	
+	
+	
+	
+	 <select id="findENFirstPage" resultType="com.aiTrans.entity.LibraryFormMap">
+		select
+		<include refid="selectLibraryFirst" />
+		from libraryD
+		where 1 = 1 and language='EN'
+		<if test="account != null and account != ''">
+		and account like '%${account}%'
+		</if>
+		<if test="column != null">
+          order by ${column} ${sort}
+        </if>
+	</select>
+	<select id="findJPFirstPage" resultType="com.aiTrans.entity.LibraryFormMap">
+		select
+		<include refid="selectLibraryFirst" />
+		from libraryD
+		where 1 = 1 and language='JP'
+		<if test="account != null and account != ''">
+		and account like '%${account}%'
+		</if>
+		<if test="column != null">
+          order by ${column} ${sort}
+        </if>
+	</select>
+	<select id="findKORFirstPage" resultType="com.aiTrans.entity.LibraryFormMap">
+		select
+		<include refid="selectLibraryFirst" />
+		from libraryD
+		where 1 = 1 and language='KOR'
+		<if test="account != null and account != ''">
+		and account like '%${account}%'
+		</if>
+		<if test="column != null">
+          order by ${column} ${sort}
+        </if>
+	</select>
+	<select id="findGERFirstPage" resultType="com.aiTrans.entity.LibraryFormMap">
+		select
+		<include refid="selectLibraryFirst" />
+		from libraryD
+		where 1 = 1 and language='GER'
+		<if test="account != null and account != ''">
+		and account like '%${account}%'
+		</if>
+		<if test="column != null">
+          order by ${column} ${sort}
+        </if>
+	</select>
+	<select id="findFRFirstPage" resultType="com.aiTrans.entity.LibraryFormMap">
+		select
+		<include refid="selectLibraryFirst" />
+		from libraryD
+		where 1 = 1 and language='FR'
+		<if test="account != null and account != ''">
+		and account like '%${account}%'
+		</if>
+		<if test="column != null">
+          order by ${column} ${sort}
+        </if>
+	</select>
+
+	<select id="findENPage" resultType="com.aiTrans.entity.LibraryFormMap">
+		select
+		<include refid="selectId" />
+		from libraryD
+		where 1 = 1 and language = 'EN'
+		<if test="account != null and account != ''">
+		and account like '%${account}%'
+		</if>
+		<if test="column != null">
+          order by ${column} ${sort}
+        </if>
+	</select>
+	<select id="findJPPage" resultType="com.aiTrans.entity.LibraryFormMap">
+		select
+		<include refid="selectId" />
+		from libraryD
+		where 1 = 1 and language = 'JP'
+		<if test="account != null and account != ''">
+		and account like '%${account}%'
+		</if>
+		<if test="column != null">
+          order by ${column} ${sort}
+        </if>
+	</select>
+	<select id="findKORPage" resultType="com.aiTrans.entity.LibraryFormMap">
+		select
+		<include refid="selectId" />
+		from libraryD
+		where 1 = 1 and language = 'KOR'
+		<if test="account != null and account != ''">
+		and account like '%${account}%'
+		</if>
+		<if test="column != null">
+          order by ${column} ${sort}
+        </if>
+	</select>
+	<select id="findGERPage" resultType="com.aiTrans.entity.LibraryFormMap">
+		select
+		<include refid="selectId" />
+		from libraryD
+		where 1 = 1 and language = 'GER'
+		<if test="account != null and account != ''">
+		and account like '%${account}%'
+		</if>
+		<if test="column != null">
+          order by ${column} ${sort}
+        </if>
+	</select>
+	<select id="findFRPage" resultType="com.aiTrans.entity.LibraryFormMap">
+		select
+		<include refid="selectId" />
+		from libraryD
+		where 1 = 1 and language = 'FR'
+		<if test="account != null and account != ''">
+		and account like '%${account}%'
+		</if>
+		<if test="column != null">
+          order by ${column} ${sort}
+        </if>
+	</select> 
+	
+	
+	
+	
+</mapper>

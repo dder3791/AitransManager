@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" 
+    "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.aiTrans.mapper.ClientUploadDataMapper">
+	<select id="findClientUploadData" parameterType="com.aiTrans.entity.ClientUploadDataFormMap" resultType="com.aiTrans.entity.ClientUploadDataFormMap">
+		select id,
+				userName,
+				softName,
+				platform,
+				source,
+				target,
+				runtime,
+				original,
+				translation 
+		from client_upload_tran_dataD 
+	</select>
+	<insert id="insertClientUploadData" parameterType="com.aiTrans.entity.ClientUploadDataFormMap">
+		insert into client_upload_tran_dataD (userName,softName,platform,	source,target,runtime,original,translation,originallen,translationlen) values (#{userName},	#{softName},	#{platform},#{source},#{target},#{runtime},#{original},#{translation},#{originalLen},#{translationLen})
+	</insert>
+</mapper>

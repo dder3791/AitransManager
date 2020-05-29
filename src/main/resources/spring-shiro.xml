@@ -69,6 +69,7 @@
 	<bean id="chainDefinitionSectionMetaSource" class="com.aiTrans.shiro.ChainDefinitionSectionMetaSource">
 		<property name="filterChainDefinitions">
 			<value>
+			/cloud/client/** = anon			
 			/favicon.ico = anon
     		/admin_files/** = anon
     		/fonts/** = anon

@@ -17,4 +17,20 @@
 	<insert id="insertClientUploadData" parameterType="com.aiTrans.entity.ClientUploadDataFormMap">
 		insert into client_upload_tran_dataD (userName,softName,platform,	source,target,runtime,original,translation,originallen,translationlen) values (#{userName},	#{softName},	#{platform},#{source},#{target},#{runtime},#{original},#{translation},#{originalLen},#{translationLen})
 	</insert>
+	<select id="findClientUploadInfo" parameterType="com.aiTrans.entity.ClientSoftInfoFormMap" resultType="com.aiTrans.entity.ClientSoftInfoFormMap">
+		select top 1
+			softName,
+			softIp,
+			userName,
+			softVersion,
+			lastUpdateTime,
+			releaseTime,
+			md5Value,
+			id,
+			softCode,
+			dataPath,
+			releaseLog
+		from client_soft_info
+		order by lastUpdateTime		
+	</select>
 </mapper>

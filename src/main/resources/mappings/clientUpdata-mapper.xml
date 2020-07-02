@@ -33,4 +33,63 @@
 		from client_soft_info
 		order by lastUpdateTime		
 	</select>
+	<select id="findCloudInfo" parameterType="java.lang.Integer" resultType="com.aiTrans.entity.ClientCloudFormMap">
+		select 
+			id,
+			moduleName,
+			moduleVersion,
+			releaseTime,
+			isAvailable,
+			ranking,
+			clientId,
+			md5Value,
+			releaseLog,
+			fileType	,
+			dataPath	
+		from client_cloud_info
+		where clientId=#{clientId}			
+	</select>
+	<select id="findCloudSingle" parameterType="com.aiTrans.entity.ClientCloudFormMap" resultType="com.aiTrans.entity.ClientCloudFormMap">
+		select 
+			id,
+			moduleName,
+			moduleVersion,
+			releaseTime,
+			isAvailable,
+			ranking,
+			clientId,
+			md5Value,
+			releaseLog,
+			fileType	,
+			dataPath			
+		from client_cloud_info
+		where clientId=#{clientId}
+		and moduleName=#{moduleName}
+		and moduleVersion=#{moduleVersion}
+		<if test="ranking != null">
+			and ranking=#{ranking}
+		</if>
+		<if test="isAvailable != null">
+			and isAvailable=#{isAvailable}
+		</if>		
+	</select>
+	<select id="findClientInfo" parameterType="com.aiTrans.entity.ClientSoftInfoFormMap" resultType="com.aiTrans.entity.ClientSoftInfoFormMap">
+		select 
+			softName,
+			softIp,
+			userName,
+			softVersion,
+			lastUpdateTime,
+			releaseTime,
+			md5Value,
+			id,
+			softCode,
+			dataPath,
+			releaseLog
+		from client_soft_info
+		where softName=#{softName}	
+		and 	softIp=#{softIp}
+		and userName=#{userName}	
+	</select>
+	
 </mapper>

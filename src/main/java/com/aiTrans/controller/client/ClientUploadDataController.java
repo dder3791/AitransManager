@@ -14,6 +14,7 @@ import javax.inject.Inject;
 import javax.servlet.ServletContext;
 import javax.servlet.http.HttpServletRequest;
 
+import org.apache.commons.lang.ArrayUtils;
 import org.apache.commons.lang.time.DateUtils;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpRequest;
@@ -25,18 +26,26 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
 
+import com.aiTrans.entity.ClientCloudFormMap;
 import com.aiTrans.entity.ClientSoftInfoFormMap;
 import com.aiTrans.entity.ClientUploadDataFormMap;
 import com.aiTrans.mapper.ClientUploadDataMapper;
 import com.aiTrans.util.Common;
+import com.aiTrans.util.MyDateUtils;
 import com.aiTrans.vo.ClientData;
 import com.aiTrans.vo.ClientUpdate;
+import com.aiTrans.vo.CloudData;
+import com.aiTrans.vo.CloudSimpleData;
+import com.aiTrans.vo.MoData;
 
+import org.apache.log4j.Logger;
 @Controller
 @RequestMapping("/cloud/client/")
 public class ClientUploadDataController {
 	@Inject
 	private ClientUploadDataMapper clientUploadDataMapper;
+	
+	public final static Logger logger = Logger.getLogger(ClientUploadDataController.class);
 	
 	@ResponseBody
 	@RequestMapping("upload")
@@ -82,25 +91,6 @@ public class ClientUploadDataController {
 		return result;	
 	}
 	/**
-	 * 请求示例 ：
-{
- "reg" : "A01",
- "un" : "aaa",
- "sn" : "Aitrans-PAT 6.0",
- "cn" : "google",
- "fr" : "1",
- "to" : "2",
- "ot" : "hello",
- "dt" : "你好",
- "oc" : 5,
- "dc" : 2
-}
- 响应示例：
-{
- "co","200",
- "oc",5,
- "dc",2
-}
 	 * @return
 	 * @throws ParseException
 	 */
@@ -135,10 +125,10 @@ public class ClientUploadDataController {
 		}else{
 			result.put("co", "200");
 			result.put("ds", "没有查到数据");
-		}
-		
+		}		
 		return result;
 	}
+	
 	@RequestMapping("/download")
     public ResponseEntity<byte[]> downLoad(HttpServletRequest request) throws Exception{
     	ClientSoftInfoFormMap dataResult = clientUploadDataMapper.findClientUploadInfo(null);
@@ -149,16 +139,27 @@ public class ClientUploadDataController {
 	    	return null;
 	    }
 	    String fileName = dPath.substring(dPath.lastIndexOf("/")+1, dPath.length());
+	    logger.info("开始下载文件，文件名："+fileName);
 	    //String realPath = servletContext.getRealPath("/WEB-INF/download/"+fileName);//得到文件所在位置
         InputStream in=new FileInputStream(new File(realPath));//将该文件加入到输入流之中
+        logger.info("开始下载文件2，InputStream："+in);
          byte[] body=null;
+         String bodyHeader = "";
+         String bodyBoot = "";
+         
          body=new byte[in.available()];// 返回下一次对此输入流调用的方法可以不受阻塞地从此输入流读取（或跳过）的估计剩余字节数
-         in.read(body);//读入到输入流里面        
+         logger.info("开始下载文件3，body："+body);
+         in.read(body);//读入到输入流里面 
+         logger.info("开始下载文件4，in："+in);
         //fileName=new String(fileName.getBytes("gbk"),"iso8859-1");//防止中文乱码
         HttpHeaders headers=new HttpHeaders();//设置响应头
+        logger.info("开始下载文件5，headers："+headers);
         headers.add("Content-Disposition", "attachment;filename="+fileName);
+        logger.info("开始下载文件6，headers："+headers);
         HttpStatus statusCode = HttpStatus.OK;//设置响应吗
+        logger.info("开始下载文件7，statusCode："+statusCode);
         ResponseEntity<byte[]> response=new ResponseEntity<byte[]>(body, headers, statusCode);
+        logger.info("开始下载文件7，ResponseEntity<byte[]>："+response);
         return response;
 
         //public ResponseEntity（T  body，
@@ -170,31 +171,314 @@ public class ClientUploadDataController {
         //headers - 实体头
         //statusCode - 状态码
     }
+    @ResponseBody
+	@RequestMapping("getcloudstatus")
+	public Map<String,Object> getCloudStatus(@RequestBody CloudData coludDate) {
+    	logger.info("传来的映射复杂json对象："+coludDate);
+    	Map<String,Object> result = new HashMap<>();
+		ClientSoftInfoFormMap params = new ClientSoftInfoFormMap();
+		params.put("softIp", coludDate.getIp());
+		params.put("softName", coludDate.getSn());
+		params.put("userName", coludDate.getUn());
+		List<MoData> moDatas = coludDate.getMo();
+		ClientSoftInfoFormMap clientInfo = clientUploadDataMapper.findClientInfo(params);
+		if(clientInfo==null){
+			result.put("co", "400");
+			result.put("ds", "没有查到客户端软件数据");
+			return result;
+		}
+		Integer cid = clientInfo.getInt("id");
+		List<ClientCloudFormMap> clouds = clientUploadDataMapper.findCloudInfo(cid);
+		result.put("co", "200");
+		result.put("ds", "查询成功");
+
+		result.put("sn", clientInfo.get("softName"));
+		result.put("un", clientInfo.get("userName"));
+		result.put("ip", clientInfo.get("softIp"));
+		
+		List<Map<String,Object>> moList = new ArrayList<>();
+		for(ClientCloudFormMap c:clouds){
+			Map<String,Object> mo = new HashMap<String,Object>();	
+			mo.put("cn", c.get("moduleName"));
+			mo.put("cv", c.get("moduleVersion"));
+			Date cdt = c.getDate("releaseTime");	
+			String cds = MyDateUtils.dateToStr(cdt,22);
+			mo.put("cd", cds);
+			mo.put("cen", c.get("isAvailable"));
+			mo.put("cr", c.get("ranking"));
+			mo.put("op", "81");
+			moList.add(mo);
+		}
+		try{
+			setNewUpdateStatus(moList,moDatas);
+		}catch(Exception ex){
+			ex.printStackTrace();
+		}
+		result.put("mo", moList);
+		
+		return result;
+	}
+    /*private void setUpdateStatus(List<MoData> from,List<Map<String,Object>> to){    	
+    	if(from!=null){
+			if(from.size()>0){
+				for(int i=0;i<from.size();i++){
+					for(int j=0;j<to.size();j++){
+						Map<String,Object> dataBaseMo = to.get(j);
+						MoData md = from.get(i);
+						if(md.getCn().equals(dataBaseMo.get("cn"))){
+							if(md.getCv().equals(dataBaseMo.get("cv"))){
+								dataBaseMo.put("op", "82");
+							}
+						}
+					}
+				}
+			}
+		}    	
+    }*/
+	/**
+	 * from中的所有对象 与 to 中的每一个对象比较，如果相同，就在form匹配的对象中增加一个字段compareCount，赋值+1；全部比较完后；遍历from的所有对象，compareCount值小于1的那个对象，就是新增的对象，设置OP的值为81
+	 */
+    private void setNewUpdateStatus(List<Map<String,Object>> from,List<MoData> to){   
+		for(int i=0;i<from.size();i++){
+			Map<String,Object> dataBaseMo = from.get(i);
+			dataBaseMo.put("cont", 0);
+			for(int j=0;j<to.size();j++){				
+				MoData md = to.get(j);
+				if(md.getCn().equals(dataBaseMo.get("cn"))){
+					if(!md.getCv().equals(dataBaseMo.get("cv"))){
+						dataBaseMo.put("op", "82");
+						countAddOne(dataBaseMo);
+					}
+					countAddOne(dataBaseMo);
+				}
+			}
+		}
+		for(int k=0;k<from.size();k++){
+			Map<String,Object> e = from.get(k);
+			int c = (Integer)e.get("cont");
+			if(c==0){
+				e.put("op", "81");
+			}
+			if(c==1){
+				e.put("op", "0");
+			}
+		}
+	
+    }
+    private void countAddOne(Map<String,Object> dataBaseMo){
+    	int cont = (Integer)dataBaseMo.get("cont");
+		cont += 1;
+		dataBaseMo.put("cont", cont);
+    }
+    @ResponseBody
+	@RequestMapping("getcloudversion")
+	public Map<String,Object> getCloudVersion(@RequestBody CloudSimpleData coludDate) {
+    	Map<String,Object> result = new HashMap<>();
+    	String moduleVersion = coludDate.getCv();
+    	String moduleName = coludDate.getCn();
+    	if(StringUtils.isEmpty(moduleName)||StringUtils.isEmpty(moduleVersion)){
+    		result.put("co", "402");
+			result.put("ds", "云翻译模块名称和版本不能为空");
+			return result;
+    	}
+		ClientSoftInfoFormMap params = new ClientSoftInfoFormMap();
+		params.put("softIp", coludDate.getIp());
+		params.put("softName", coludDate.getSn());
+		params.put("userName", coludDate.getUn());		
+		ClientSoftInfoFormMap clientInfo = clientUploadDataMapper.findClientInfo(params);
+		if(clientInfo==null){
+			result.put("co", "400");
+			result.put("ds", "没有查到客户端软件数据");
+			return result;
+		}
+		Integer cid = clientInfo.getInt("id");
+		if(cid==null){
+			result.put("co", "401");
+			result.put("ds", "客户端软件ID为空");
+			return result;
+		}
+		
+		ClientCloudFormMap queryParams = new ClientCloudFormMap();
+		queryParams.put("clientId", cid);
+		queryParams.put("moduleVersion", moduleVersion);
+		queryParams.put("moduleName", moduleName);
+		ClientCloudFormMap clouds = clientUploadDataMapper.findCloudSingle(queryParams);
+		if(clouds==null){
+			result.put("co", "200");
+			result.put("ds", "查询成功,无返回数据");
+		}else{
+			result.put("co", "200");
+			result.put("ds", "查询成功");			
+			result.put("cn", clouds.get("moduleName"));//	云翻译模块名称	
+			result.put("cv",  clouds.get("moduleVersion"));//云翻译模块版本(新版本)
+			Date cdt = clouds.getDate("releaseTime");	
+			String cds = MyDateUtils.dateToStr(cdt,22);
+			result.put("cd",  cds);//发布时间(新版本)
+			result.put("ch",  clouds.get("md5Value"));//云翻译模块发布日志(新版本)
+			result.put("cl",  clouds.get("releaseLog"));//云翻译模块发布日志(新版本)
+			result.put("cen",  clouds.getInt("isAvailable"));//云翻译模块是否生效（默认为生效 (1,0)）
+			result.put("cr",  clouds.get("ranking"));//云翻译模块排名(新版本)
+			result.put("ct",  clouds.get("fileType"));//云翻译模块文件类型(值：ZIP或DLL(默认DLL，如果该字段不存在，则自动误别个DLL))			
+		}
+		return result;
+	}
+    @ResponseBody
+	@RequestMapping("uploadoldversion")
+	public Map<String,Object> uploadOldVersion(@RequestBody CloudSimpleData coludDate) {
+    	Map<String,Object> result = new HashMap<>();
+    	String moduleVersion = coludDate.getCv();
+    	String moduleName = coludDate.getCn();
+    	if(StringUtils.isEmpty(moduleName)||StringUtils.isEmpty(moduleVersion)){
+    		result.put("co", "402");
+			result.put("ds", "云翻译模块名称和版本不能为空");
+			return result;
+    	}
+		ClientSoftInfoFormMap params = new ClientSoftInfoFormMap();
+		params.put("softIp", coludDate.getIp());
+		params.put("softName", coludDate.getSn());
+		params.put("userName", coludDate.getUn());		
+		ClientSoftInfoFormMap clientInfo = clientUploadDataMapper.findClientInfo(params);
+		if(clientInfo==null){
+			result.put("co", "400");
+			result.put("ds", "没有查到客户端软件数据");
+			return result;
+		}
+		Integer cid = clientInfo.getInt("id");
+		if(cid==null){
+			result.put("co", "401");
+			result.put("ds", "客户端软件ID为空");
+			return result;
+		}
+		
+		ClientCloudFormMap queryParams = new ClientCloudFormMap();
+		queryParams.put("clientId", cid);
+		queryParams.put("moduleName", moduleName);
+		queryParams.put("isAvailable", coludDate.getCen());
+		queryParams.put("moduleVersion", coludDate.getCv());
+		queryParams.put("ranking", coludDate.getCr());
+		ClientCloudFormMap clouds = clientUploadDataMapper.findCloudSingle(queryParams);
+		if(clouds==null){
+			result.put("co", "200");
+			result.put("ds", "查询成功,无返回数据");
+		}else{
+			result.put("co", "200");
+			result.put("ds", "查询成功");			
+			result.put("cn", clouds.get("moduleName"));//	云翻译模块名称	
+			result.put("cv",  clouds.get("moduleVersion"));//云翻译模块版本(新版本)
+			Date cdt = clouds.getDate("releaseTime");	
+			String cds = MyDateUtils.dateToStr(cdt,22);
+			result.put("cd",  cds);//发布时间(新版本)
+			result.put("ch",  clouds.get("md5Value"));//云翻译模块发布日志(新版本)
+			result.put("cl",  clouds.get("releaseLog"));//云翻译模块发布日志(新版本)
+			result.put("cen",  clouds.getInt("isAvailable"));//云翻译模块是否生效（默认为生效 (1,0)）
+			result.put("cr",  clouds.get("ranking"));//云翻译模块排名(新版本)
+			result.put("ct",  clouds.get("fileType"));//云翻译模块文件类型(值：ZIP或DLL(默认DLL，如果该字段不存在，则自动误别个DLL))			
+		}
+		return result;
+	}
+    @RequestMapping("/downloadcloud")
+    public ResponseEntity<byte[]> downLoadCloud(HttpServletRequest request,@RequestBody CloudSimpleData coludDate) throws Exception{    	
+    	Map<String,Object> result = new HashMap<>();
+    	ClientSoftInfoFormMap clientSoftInfo =queryClient(coludDate);
+    	if(clientSoftInfo==null){
+    		return null;
+    	}
+    	String moduleVersion = coludDate.getCv();
+    	String moduleName = coludDate.getCn();
+    	if(StringUtils.isEmpty(moduleName)||StringUtils.isEmpty(moduleVersion)){    	
+			return null;
+    	}
+    	Integer cid = clientSoftInfo.getInt("id");
+    	ClientCloudFormMap queryParams = new ClientCloudFormMap();
+		queryParams.put("clientId", cid);
+		queryParams.put("moduleName", moduleName);
+		queryParams.put("moduleVersion", coludDate.getCv());
+		ClientCloudFormMap clouds = clientUploadDataMapper.findCloudSingle(queryParams);		
+    	String dPath = clouds.getStr("dataPath");
+	    ServletContext servletContext = request.getServletContext();
+	    String realPath = servletContext.getRealPath(dPath);
+	    if(StringUtils.isEmpty(realPath)){
+	    	return null;
+	    }
+	    String fileName = dPath.substring(dPath.lastIndexOf("/")+1, dPath.length());
+	    logger.info("开始下载文件，文件名："+fileName);
+	    //String realPath = servletContext.getRealPath("/WEB-INF/download/"+fileName);//得到文件所在位置
+        InputStream in=new FileInputStream(new File(realPath));//将该文件加入到输入流之中
+        logger.info("开始下载文件2，InputStream："+in);
+         byte[] body=null;
+         String bodyHStr = "{\"co\":\"200\",\"ds\":\"SUCCESS\",\"da\":\"";
+         String bodyBStr = "\"}";
+         byte[] bodyHByte = bodyHStr.getBytes();
+         byte[] bodyBootByte = bodyBStr.getBytes();        
+         body=new byte[in.available()];// 返回下一次对此输入流调用的方法可以不受阻塞地从此输入流读取（或跳过）的估计剩余字节数
+         byte[] rsbody = ArrayUtils.addAll(bodyHByte,body );
+         byte[] frsbody = ArrayUtils.addAll(rsbody,bodyBootByte );
+         logger.info("开始下载文件3，body："+body);
+         in.read(body);//读入到输入流里面 
+         logger.info("开始下载文件4，in："+in);
+        //fileName=new String(fileName.getBytes("gbk"),"iso8859-1");//防止中文乱码
+        HttpHeaders headers=new HttpHeaders();//设置响应头
+        logger.info("开始下载文件5，headers："+headers);
+        headers.add("Content-Disposition", "attachment;filename="+fileName);
+        logger.info("开始下载文件6，headers："+headers);
+        HttpStatus statusCode = HttpStatus.OK;//设置响应吗
+        logger.info("开始下载文件7，statusCode："+statusCode);
+        ResponseEntity<byte[]> response=new ResponseEntity<byte[]>(frsbody, headers, statusCode);
+        logger.info("开始下载文件7，ResponseEntity<byte[]>："+response);
+        return response;
+
+        //public ResponseEntity（T  body，
+        //                       MultiValueMap < String，String > headers，
+        //                       HttpStatus  statusCode）
+        //HttpEntity使用给定的正文，标题和状态代码创建一个新的。
+        //参数：
+        //body - 实体机构
+        //headers - 实体头
+        //statusCode - 状态码
+    }
+    private ClientSoftInfoFormMap queryClient(CloudSimpleData coludDate){
+    	Map<String,Object> result = new HashMap<>();
+    	String moduleVersion = coludDate.getCv();
+    	String moduleName = coludDate.getCn();
+    	if(StringUtils.isEmpty(moduleName)||StringUtils.isEmpty(moduleVersion)){
+			return null;
+    	}
+		ClientSoftInfoFormMap params = new ClientSoftInfoFormMap();
+		params.put("softIp", coludDate.getIp());
+		params.put("softName", coludDate.getSn());
+		params.put("userName", coludDate.getUn());		
+		ClientSoftInfoFormMap clientInfo = clientUploadDataMapper.findClientInfo(params);
+		return clientInfo;
+    }
 	public static void main(String args[]){
-		String runtime = "2020-09-23 12:23:56";
+		//String runtime = "2020-09-23 12:23:56";
 		try {//YYYY-MM-DD hh:mm:ss
-			Date runTime = DateUtils.parseDate(runtime, new String[]{"yyyy-MM-dd HH:mm:ss","yyyy-MM-dd","yyyyMMdd"});
+			//Date runTime = DateUtils.parseDate(runtime, new String[]{"yyyy-MM-dd HH:mm:ss","yyyy-MM-dd","yyyyMMdd"});
 			//System.out.println(runTime);
 			
-			String s = "一种这样的方法是通过低压模制将光源和相关的电子部件（统称为“封装”）封装在透明树脂中，然后在封装的封装上方或周围注塑塑料。封装的包装物被嵌入塑料中，塑料的一部分是透明或半透明的，这样透明或半透明的塑料就能看到来自封装包装的光，从而产生背光效果。\n"+
-"另一种这样的方法是将光源和相关的电子器件（“包装”）安装到聚合物膜上，将膜形成为期望的形状，然后将形成的膜插入具有基本相同形状的注射模具中。接下来的步骤将塑料注模到薄膜上，从而使包装件嵌入安装在其上的薄膜和模制在其上的塑料之间，并且薄膜和/b或塑料的部分是透明或半透明的，从而使光从光源发出的光线从零件外部可见，从而产生背光效果。"+
-
-
-"本实用新型公开了基于PFM脉冲频率调制的LED照明器，包括不少于两种颜色的光源，所述光源耦合至一个电源电路，该电源电路包括一个供电电源、一个常规基准电压、用于驱动各种光源发光的驱动器和一个控制器，该控制器包括一个用于识别自我并对一个分配给控制器的输入信号做出反应可该变的地址，该控制器用于产生各种PFM的信号，每一个PFM信号相当于LED各种颜色中单独的一种颜色，每一个PFM信号指令一个独立的开关根据一个特定的相关的频率进行通断，这里所说的数据流包括不少于两种LED颜色的数据；本实用新型能准确调节彩色LED照明器颜色及其亮度，在轻负载和低电流得情况下，采用PFM控制驱动器的方式比PWM更具效率。";
+			//String s = "，该电源电路包括一个供电电源、一个常规基准电压、用于驱动各种光源发光的驱动器和一个控制器，该控制器包括一个用于识别自我并对一个分配给控制器的输入信号做出反应可该变的地址，该控制器用于产生各种PFM的信号，每一个PFM信号相当于LED各种颜色中单独的一种颜色，每一个PFM信号指令一个独立的开关根据一个特定的相关的频率进行通断，这里所说的数据流包括不少于两种LED颜色的数据；本实用新型能准确调节彩色LED照明器颜色及其亮度，在轻负载和低电流得情况下，采用PFM控制驱动器的方式比PWM更具效率。";
 			//System.out.println("文本长度："+s.length());	
 			
 			
-			Integer i = 0xfafafa;
+			//Integer i = 0xfafafa;
 			
 			//System.out.println(i);
-			String realPath = "/WEB-INF/downloads/libaow.dll";
-			String fileName = realPath.substring(realPath.lastIndexOf("/")+1, realPath.length());
-			System.out.println(fileName);
+			//String realPath = "/WEB-INF/downloads/libaow.dll";
+			//String fileName = realPath.substring(realPath.lastIndexOf("/")+1, realPath.length());
+			//System.out.println(fileName);
+			int a[] = {1,2,3,4,5};
+			int b[] = {7,8,9};
+			int c[] = {10,11,12,13};
+			int rs[] = ArrayUtils.addAll(a,b);
+			int rs2[] = ArrayUtils.addAll(rs, c);
+			for(int i:rs2){
+				System.out.println(i);
+			}
 			
 			
 			
 			
-		} catch (ParseException e) {
+		} catch (Exception e) {
 			
 			e.printStackTrace();
 		}
@@ -213,4 +497,6 @@ public class ClientUploadDataController {
 		}
 		return rs;
 	}
+	
+	
 }

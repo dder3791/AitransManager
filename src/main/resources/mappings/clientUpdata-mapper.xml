@@ -45,9 +45,9 @@
 			md5Value,
 			releaseLog,
 			fileType	,
-			dataPath	
-		from client_cloud_info
-		where clientId=#{clientId}			
+			dataPath,
+			size	
+		from client_cloud_info		
 	</select>
 	<select id="findCloudSingle" parameterType="com.aiTrans.entity.ClientCloudFormMap" resultType="com.aiTrans.entity.ClientCloudFormMap">
 		select 
@@ -61,7 +61,9 @@
 			md5Value,
 			releaseLog,
 			fileType	,
-			dataPath			
+			dataPath,
+			size,
+			fileName			
 		from client_cloud_info
 		where clientId=#{clientId}
 		and moduleName=#{moduleName}
@@ -87,9 +89,153 @@
 			dataPath,
 			releaseLog
 		from client_soft_info
-		where softName=#{softName}	
-		and 	softIp=#{softIp}
-		and userName=#{userName}	
+		where softName=#{softName}
+		and userName=#{userName}
+	</select>
+	<select id="findCloudNew" parameterType="com.aiTrans.entity.ClientCloudFormMap" resultType="com.aiTrans.entity.ClientCloudFormMap">
+		SELECT top 1
+			id,
+			moduleName,
+			moduleVersion,
+			releaseTime,
+			isAvailable,
+			ranking,
+			clientId,
+			md5Value,
+			releaseLog,
+			fileType,
+			dataPath,
+			size,
+			fileName
+		FROM
+			client_cloud_info
+		WHERE
+			clientId =#{clientId}
+		AND
+			moduleName=#{moduleName}
+		order by releaseTime desc
+		
 	</select>
 	
+	<select id="findCloudVersion" parameterType="java.util.Map" resultType="com.aiTrans.vo.CloudVersion">
+			SELECT
+				CCI.id,
+				CCI.moduleName,
+				CCI.isAvailable,
+				CCI.ranking,
+				CCI.clientId,	
+				CCI.releaseLog,
+				CCV.md5Value,
+				CCV.fileType,
+				CCV.dataPath,
+				CCV.size,
+				CCV.moduleVersion,
+				CCV.releaseTime
+			FROM
+				client_cloud_info CCI,
+				client_cloud_version CCV
+			WHERE
+				CCI.id = CCV.moduleId
+			<if test="cloudId != null">
+				AND  CCI.id =#{cloudId}
+			</if>
+			<if test="moduleName != null">
+				AND  CCI.moduleName like '%'+#{moduleName}+'%' 
+			</if>
+			<if test="moduleVersion != null">
+				AND  CCI.moduleVersion=#{moduleVersion}
+			</if>	
+	</select>
+	<insert id="insertCloudVersion" parameterType="com.aiTrans.entity.ClientCloudVersionFormMap">
+		insert into client_cloud_version 
+			(
+				moduleId,
+				moduleVersion,
+				releaseTime,
+				md5Value,
+				fileType,
+				dataPath,
+				size
+
+			)
+			 values 
+			 (
+			 	#{moduleId},
+				#{moduleVersion},
+				#{releaseTime},
+				#{md5Value},
+				#{fileType},
+				#{dataPath},
+				#{size}
+			 )
+	</insert>
+	<insert id="insertCloudLog" parameterType="com.aiTrans.entity.ClientCloudLogFormMap">
+	</insert>
+	<select id="findCloudLog" parameterType="com.aiTrans.entity.ClientCloudLogFormMap" resultType="com.aiTrans.entity.ClientCloudLogFormMap">
+	</select>
+	<update id="updateCloudLog" parameterType="com.aiTrans.entity.ClientCloudLogFormMap">
+	</update>
+	<select id="getCloudLog" parameterType="com.aiTrans.entity.ClientCloudLogFormMap" resultType="com.aiTrans.entity.ClientCloudLogFormMap">
+	</select>
+	<select id="findCloudInfos" parameterType="java.lang.Integer" resultType="com.aiTrans.entity.ClientCloudFormMap">
+		select 
+			id,
+			moduleName,
+			moduleVersion,
+			releaseTime,
+			isAvailable,
+			ranking,
+			clientId,
+			md5Value,
+			releaseLog,
+			fileType,
+			dataPath,
+			size,
+			fileName
+		from client_cloud_info
+	</select>
+	<insert id="insertCloudData" parameterType="com.aiTrans.entity.ClientCloudFormMap">
+		insert into client_cloud_info 
+		(
+			moduleName,
+			moduleVersion,
+			releaseTime,
+			isAvailable,
+			ranking,
+			clientId,
+			md5Value,
+			releaseLog,
+			fileType
+		)
+		 values 
+		 (
+		 	#{moduleName},
+		 	#{moduleVersion},
+		 	#{releaseTime},
+		 	#{isAvailable},
+		 	#{ranking},
+		 	#{clientId},
+		 	#{md5Value},
+		 	#{releaseLog},
+		 	#{fileType}
+		 )
+	</insert>
+	<update id="updateCloudData" parameterType="com.aiTrans.entity.ClientCloudFormMap">
+		update client_cloud_info
+		<trim prefix="set" suffixOverrides=",">
+			<if test="moduleName!=null">moduleName=#{moduleName},</if>
+			<if test="moduleVersion!=null">moduleVersion=#{moduleVersion},</if>
+			<if test="releaseTime!=null">releaseTime=#{releaseTime},</if>
+			<if test="isAvailable!=null">isAvailable=#{isAvailable},</if>
+			<if test="ranking!=null">ranking=#{ranking},</if>
+			<if test="clientId!=null">clientId=#{clientId},</if>
+			<if test="md5Value!=null">md5Value=#{md5Value},</if>
+			<if test="releaseLog!=null">releaseLog=#{releaseLog},</if>
+			<if test="fileType!=null">fileType=#{fileType},</if>
+			<if test="dataPath!=null">dataPath=#{dataPath},</if>
+			<if test="size!=null">size=#{size},</if>
+			<if test="fileName!=null">fileName=#{fileName},</if>
+		</trim>
+		where id=#{id}
+	</update>
 </mapper>

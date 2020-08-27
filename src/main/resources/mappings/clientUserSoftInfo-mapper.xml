@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" 
+    "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.aiTrans.mapper.ClientUserSoftInfoMapper">
+	<select id="findByCodeAndName" parameterType="com.aiTrans.entity.ClientUserSoftInfoFormMap" resultType="com.aiTrans.entity.ClientUserSoftInfoFormMap">
+		select * from client_user_soft_info where userName=#{userName} and userCode=#{userCode}
+	</select>
+	<select id="findTrans" parameterType="java.util.Map" resultType="java.util.Map">
+		select level,wallet from translatorD where clientSoftName=#{clientSoftName} and clientSoftCode=#{clientSoftCode}
+	</select>
+	<select id="findCloud" parameterType="java.lang.Integer" resultType="com.aiTrans.entity.ClientCloudFormMap">
+		select * from client_cloud_info where id=#{id}
+	</select>
+	<insert id="insertData" parameterType="com.aiTrans.entity.ClientUserSoftInfoFormMap">
+	insert into client_user_soft_info 
+			(
+				userName,
+				userCode,
+				softName,
+				authTime,
+				os,
+				ip,
+				licenseLevel,
+				licenseCode,
+				licenseTime,
+				translatePair
+			)
+			 values 
+			 (
+			 	#{userName},
+				#{userCode},
+				#{softName},
+				#{authTime},
+				#{os},
+				#{ip},
+				#{licenseLevel},
+				#{licenseCode},
+				#{licenseTime},
+				#{translatePair}
+			 )
+	</insert>
+	<update id="updateData" parameterType="com.aiTrans.entity.ClientUserSoftInfoFormMap"></update>
+</mapper>

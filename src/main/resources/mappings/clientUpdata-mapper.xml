@@ -238,4 +238,11 @@
 		</trim>
 		where id=#{id}
 	</update>
+	<select id="getTransInfo" parameterType="java.util.Map" resultType="java.lang.Integer">
+		select count(*) from translatorD 
+		where 
+		clientSoftName=#{clientSoftName}
+		and 
+		clientSoftCode=#{clientSoftCode}
+	</select>
 </mapper>

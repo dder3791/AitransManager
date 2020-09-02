@@ -6,7 +6,7 @@
 		select * from client_user_soft_info where userName=#{userName} and userCode=#{userCode}
 	</select>
 	<select id="findTrans" parameterType="java.util.Map" resultType="java.util.Map">
-		select level,wallet from translatorD where clientSoftName=#{clientSoftName} and clientSoftCode=#{clientSoftCode}
+		select * from translatorD where clientSoftName=#{clientSoftName} and clientSoftCode=#{clientSoftCode}
 	</select>
 	<select id="findCloud" parameterType="java.lang.Integer" resultType="com.aiTrans.entity.ClientCloudFormMap">
 		select * from client_cloud_info where id=#{id}

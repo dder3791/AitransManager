@@ -636,58 +636,54 @@ public class ClientUploadDataController {
         		return result;
         	}
         	Map<String,Object> query = new HashMap<>();
-        	query.put("userName",un);
-        	query.put("userCode",uc);
-        	//int i = clientUploadDataMapper.getTransInfo(query);
-        	ClientUserSoftInfoFormMap rs = clientUserSoftInfoMapper.findByCodeAndName(query);        	
+        	query.put("clientSoftName",un);
+        	query.put("clientSoftCode",uc);
+        	Map<String,Object> rs = clientUserSoftInfoMapper.findTrans(query);
+        	//ClientUserSoftInfoFormMap rs = clientUserSoftInfoMapper.findByCodeAndName(query);        	
         	StringBuffer msbody = new StringBuffer();
         	if(rs!=null){
         		result.put("co", "200");
         		result.put("ds", "客户端用户认证成功");
         		result.put("vi", rs.get("licenseLevel"));
-        		Map<String,Object> params = new HashMap<>();
-        		params.put("clientSoftName", query.get("userName"));
-        		params.put("clientSoftCode", query.get("userCode"));
-        		Map<String,Object> trans =  clientUserSoftInfoMapper.findTrans(params);
-        		if(trans!=null){
-        			msbody.append("译员级别："+trans.get("level")+",账户余额:"+trans.get("wallet")+",");
-        		}else{
-        			msbody.append("您已经是客户端软件用户，请注册成为平台译员，并完善客户端软件的相关信息，详情登录官网http");
-        		}        		
-        		Integer cloudId = rs.getInt("cloudId");
-        		if(cloudId!=null){
-    				ClientCloudFormMap cloud = clientUserSoftInfoMapper.findCloud(cloudId);
-    				if(cloud!=null){
-    					msbody.append("云翻译价格:"+cloud.getBigDecimal("price"));
-    					result.put("cn", cloud.get("fileName"));
-    					result.put("pfkey", cloud.get("secretKey"));
-    					result.put("pfuc", cloud.get("secretCode"));
-    				}
-    			}
+        		msbody.append("译员级别："+rs.get("level")+",账户余额:"+rs.get("wallet")+",");
         		result.put("ms", msbody);
         	}else{
-        		msbody.append("以为您创建成为客户端软件用户，请注册成为平台译员，并完善客户端软件的相关信息，详情登录官网http");
-        		result.put("co", "402");
-        		result.put("ms", msbody);
+        		Map<String,Object> params = new HashMap<>();
+        		params.put("userName",un);
+        		params.put("userCode",uc);
+        		ClientUserSoftInfoFormMap rsu = clientUserSoftInfoMapper.findByCodeAndName(params); 
+        		if(rsu!=null){
+        			msbody.append("您是客户端软件用户，请注册成为平台译员，并完善客户端软件的相关信息，详情登录官网http");
+        			result.put("co", "200");
+        			result.put("ms", msbody);
+        		}else{
+        			ClientUserSoftInfoFormMap saveParams = new ClientUserSoftInfoFormMap();
+	        		saveParams.put("userName", un);
+	        		saveParams.put("userCode", uc);
+	        		saveParams.put("softName", sn);
+	        		saveParams.put("authTime", new Date());
+	        		saveParams.put("os", wp);
+	        		saveParams.put("ip", ip);
+	        		saveParams.put("licenseLevel", ll);
+	        		saveParams.put("licenseCode", lc);
+	        		saveParams.put("licenseTime", lt);
+	        		saveParams.put("translatePair", tp);        		
+	        		int i = clientUserSoftInfoMapper.insertData(saveParams);
+	        		if(i>0){
+	        			logger.info("保存客户端软件用户数据成功");
+	        			msbody.append("以为您创建成为客户端软件用户，请注册成为平台译员，并完善客户端软件的相关信息，详情登录官网http");
+	        			result.put("co", "200");
+	        			result.put("ms", msbody);
+	        		}else{
+	        			logger.info("保存客户端软件用户数据失败");
+	        			msbody.append("创建成为客户端软件失败，系统异常");
+	        			result.put("co", "402");
+	        			result.put("ms", msbody);
+	        		}
+        		}
         		//result.put("ds", "客户端用户认证失败-用户名和软件码不存在");
         		
-        		ClientUserSoftInfoFormMap saveParams = new ClientUserSoftInfoFormMap();
-        		saveParams.put("userName", un);
-        		saveParams.put("userCode", uc);
-        		saveParams.put("softName", sn);
-        		saveParams.put("authTime", new Date());
-        		saveParams.put("os", wp);
-        		saveParams.put("ip", ip);
-        		saveParams.put("licenseLevel", ll);
-        		saveParams.put("licenseCode", lc);
-        		saveParams.put("licenseTime", lt);
-        		saveParams.put("translatePair", tp);        		
-        		int i = clientUserSoftInfoMapper.insertData(saveParams);
-        		if(i>0){
-        			logger.info("保存客户端软件用户数据成功");
-        		}else{
-        			logger.info("保存客户端软件用户数据失败");
-        		}
+        		
         		
         	}
            	

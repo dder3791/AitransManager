@@ -107,13 +107,19 @@ public interface ClientUploadDataMapper extends BaseMapper{
 	 * @param params
 	 * @return
 	 */
-	public ClientCloudLogFormMap updateCloudData(Map<String,Object> params);
+	public Integer updateCloudData(Map<String,Object> params);
 	/**
 	 * 客户端软件用户认证
 	 * @param params
 	 * @return
 	 */
 	public Integer getTransInfo(Map<String,Object> params);
+	/**
+	 * 删除云翻译数据
+	 * @param id
+	 * @return
+	 */
+	public Integer delCloud(String[] ids);
 	
 
 }

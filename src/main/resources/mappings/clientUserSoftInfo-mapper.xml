@@ -9,7 +9,7 @@
 		select * from translatorD where clientSoftName=#{clientSoftName} and clientSoftCode=#{clientSoftCode}
 	</select>
 	<select id="findCloud" parameterType="java.lang.Integer" resultType="com.aiTrans.entity.ClientCloudFormMap">
-		select * from client_cloud_info where id=#{id}
+		select * from client_cloud_info where isAvailable=1
 	</select>
 	<insert id="insertData" parameterType="com.aiTrans.entity.ClientUserSoftInfoFormMap">
 	insert into client_user_soft_info 

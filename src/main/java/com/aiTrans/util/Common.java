@@ -715,4 +715,13 @@ public class Common {
 			}
 		}
 	}
+	public static String nullToBlank(String s){
+		if(StringUtils.isEmpty(s)){
+			return "";
+		}else{
+			return s;
+		}
+		
+	}
+	
 }

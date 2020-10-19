@@ -8,6 +8,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.PrintWriter;
+import java.math.BigDecimal;
 import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.Date;
@@ -63,7 +64,11 @@ public class ClientUploadDataController {
 	public final static Logger logger = Logger.getLogger(ClientUploadDataController.class);
 
 	private static final Exception Exception = null;
-	
+	/**
+	 * （C001）客户端上传云翻译数据
+	 * @param clientData
+	 * @return
+	 */
 	@ResponseBody
 	@RequestMapping("upload")
 	public Map<String,Object> upload(@RequestBody ClientData clientData) {
@@ -203,6 +208,7 @@ public class ClientUploadDataController {
     }
 	/**
 	 * A10 请求
+	 * （C010）查询云翻译模块状态（是否更新）
 	 * @param coludDate
 	 * @return
 	 */
@@ -218,14 +224,33 @@ public class ClientUploadDataController {
 	    		params.put("softName", coludDate.getSn());
 	    		params.put("userName", coludDate.getUn());
 	    		List<MoData> clientMos = coludDate.getMo();
-	    		ClientSoftInfoFormMap clientInfo = clientUploadDataMapper.findClientInfo(params);
-	    		if(clientInfo==null){
+	    		//ClientSoftInfoFormMap clientInfo = clientUploadDataMapper.findClientInfo(params);//正式环境打开此行
+	    		/**
+	    		 * {id=3, softIp=192.168.1.108, dataPath=/WEB-INF/downloads/libaow.dll, 
+	    		 * softName=Aitrans-PAT 6.0, md5Value=0123456789abcdeffedcba986543210,
+	    		 *  lastUpdateTime=2020-07-28 10:31:16.0, 
+	    		 *  userName=ZlpApple, 
+	    		 *  releaseTime=2020-07-28 10:31:19.0, 
+	    		 *  softCode=22LIJO1TTDZWY, releaseLog=1}
+	    		 */
+	    		/*if(clientInfo==null){//测试用
 	    			result.put("co", "400");
 	    			result.put("ds", "没有查到客户端软件数据");
 	    			return result;
-	    		}
+	    		}*/
+	    		/**
+	    		 * 下面是测试数据，正式环境，删除
+	    		 */
+	    		ClientSoftInfoFormMap clientInfo = new ClientSoftInfoFormMap();
+	    		clientInfo.set("id", 3);
+	    		clientInfo.set("softName", coludDate.getSn());
+	    		clientInfo.set("userName", coludDate.getUn());
+	    		clientInfo.set("softIp", coludDate.getIp());
+	    		/**
+	    		 * 测试数据结束 
+	    		 */
 	    		Integer cid = clientInfo.getInt("id");
-	    		List<ClientCloudFormMap> clouds = clientUploadDataMapper.findCloudInfo(cid);		
+	    		List<ClientCloudFormMap> clouds = clientUploadDataMapper.findCloudInfo(cid);		    		
 	    		List<MoData> serverMos = new ArrayList<>();
 	    		for(ClientCloudFormMap c:clouds){
 	    			MoData mo = new MoData();
@@ -236,6 +261,12 @@ public class ClientUploadDataController {
 	    			mo.setCd(cds);
 	    			mo.setCen(String.valueOf(c.getInt("isAvailable")));
 	    			mo.setCr(String.valueOf(c.get("ranking")));
+	    			mo.setCh(c.getStr("md5Value"));
+	    			mo.setCl(c.getStr("releaseLog"));
+	    			mo.setCt(c.getStr("fileType"));
+	    			mo.setCs(c.get("size").toString());
+	    			mo.setCp(c.getStr("fileName"));
+	    			
 	    			mo.setOp("0");	    			
 	    			serverMos.add(mo);
 	    		}		
@@ -491,8 +522,8 @@ public class ClientUploadDataController {
 			result.put("ds", "查询成功,无返回数据");
 		}else{
 			result.put("co", "200");
-			result.put("ds", "查询成功");			
-			result.put("cn", clouds.get("moduleName"));//	云翻译模块名称	
+			result.put("ds", "查询成功");
+			result.put("cn", clouds.get("moduleName"));//	云翻译模块名称
 			result.put("cv",  clouds.get("moduleVersion"));//云翻译模块版本(新版本)
 			Date cdt = clouds.getDate("releaseTime");	
 			String cds = MyDateUtils.dateToStr(cdt,22);
@@ -612,6 +643,7 @@ public class ClientUploadDataController {
    	}
     /**
      * A03请求（新A001请求）
+     * （A001）客户端软件用户认证
      * @param ClientCheckData
      * @return
      */
@@ -635,64 +667,110 @@ public class ClientUploadDataController {
         		result.put("ds", "客户端用户认证失败-用户名和软件码不能为空");
         		return result;
         	}
+        	StringBuffer msbody = new StringBuffer();
         	Map<String,Object> query = new HashMap<>();
         	query.put("clientSoftName",un);
         	query.put("clientSoftCode",uc);
-        	Map<String,Object> rs = clientUserSoftInfoMapper.findTrans(query);
-        	//ClientUserSoftInfoFormMap rs = clientUserSoftInfoMapper.findByCodeAndName(query);        	
-        	StringBuffer msbody = new StringBuffer();
-        	if(rs!=null){
-        		result.put("co", "200");
-        		result.put("ds", "客户端用户认证成功");
-        		result.put("vi", rs.get("licenseLevel"));
-        		msbody.append("译员级别："+rs.get("level")+",账户余额:"+rs.get("wallet")+",");
-        		result.put("ms", msbody);
-        	}else{
-        		Map<String,Object> params = new HashMap<>();
-        		params.put("userName",un);
-        		params.put("userCode",uc);
-        		ClientUserSoftInfoFormMap rsu = clientUserSoftInfoMapper.findByCodeAndName(params); 
-        		if(rsu!=null){
+        	Map<String,Object> params = new HashMap<>();
+    		params.put("userName",un);
+    		params.put("userCode",uc);
+        	Map<String,Object> trans = clientUserSoftInfoMapper.findTrans(query);//查询译员信息
+        	ClientUserSoftInfoFormMap softUser = clientUserSoftInfoMapper.findByCodeAndName(params); //查询软件用户信息
+        	if(trans!=null){
+        		if(softUser!=null){
+        			//校验授权信息是否一致
+        			String licenseLevel = String.valueOf(softUser.get("licenseLevel"));
+        			String licenseCode = String.valueOf(softUser.get("licenseCode"));
+        			String licenseTime = String.valueOf(softUser.get("licenseTime"));
+        			if(StringUtils.isEmpty(ll)||StringUtils.isEmpty(lc)||StringUtils.isEmpty(lt)){
+        				result.put("co", "400");
+                		result.put("ds", "客户端用户没有授权信息，将由服务端已下发！");
+                		//在此记录此客户端的信息，更新状态为，即将接受服务端授权信息的下发，此功能未开发                		
+        			}else if(StringUtils.isEmpty(licenseLevel)||StringUtils.isEmpty(licenseCode)||StringUtils.isEmpty(licenseTime)){
+        				//服务端没有软件用户的授权信息，通知管理员，更新授权信息
+        				logger.info("请管理员添加软件授权信息");
+        				//dosthing....
+        			}else if(lc.equals(licenseCode)){//客户端提交的授权信息与服务端一致
+        				//}else if(ll.equals(licenseLevel)&&lc.equals(licenseCode)&&lt.equals(licenseTime)){正式环境，请修改为此行......
+        				result.put("co", "200");
+                		result.put("ds", "客户端用户认证成功");
+                		msbody.append("译员昵称："+trans.get("nickname")+",译员级别："+trans.get("level")+",账户余额:"+trans.get("wallet")+",");
+        			}else{//客户端提交的授权信息与服务端不一致
+        				result.put("co", "400");
+                		result.put("ds", "客户端用户授权信息验证失败！");
+        			}
+        			result.put("ll", Common.nullToBlank(licenseLevel));
+        			result.put("lc", Common.nullToBlank(licenseCode));
+        			result.put("lt", Common.nullToBlank(licenseTime));
+        		}else{//该译员不是软件用户，将初始化译员的客户端软件信息
+        			int i = initSoftUser(clientCheckData);//保存软件用户信息   
+            		if(i>0){
+            			logger.info("保存客户端软件用户数据成功");
+            			msbody.append("以为您创建成为客户端软件用户");
+            			result.put("co", "200");
+            		}else{
+            			logger.info("保存客户端软件用户数据失败");
+            			msbody.append("创建成为客户端软件用户失败，系统异常");
+            			result.put("co", "402");
+            		}
+        		}
+        	}else{//没有查到译员信息
+        		if(softUser!=null){//该用户已经是是软件用户，引导其注册成为译员
         			msbody.append("您是客户端软件用户，请注册成为平台译员，并完善客户端软件的相关信息，详情登录官网http");
         			result.put("co", "200");
-        			result.put("ms", msbody);
-        		}else{
-        			ClientUserSoftInfoFormMap saveParams = new ClientUserSoftInfoFormMap();
-	        		saveParams.put("userName", un);
-	        		saveParams.put("userCode", uc);
-	        		saveParams.put("softName", sn);
-	        		saveParams.put("authTime", new Date());
-	        		saveParams.put("os", wp);
-	        		saveParams.put("ip", ip);
-	        		saveParams.put("licenseLevel", ll);
-	        		saveParams.put("licenseCode", lc);
-	        		saveParams.put("licenseTime", lt);
-	        		saveParams.put("translatePair", tp);        		
-	        		int i = clientUserSoftInfoMapper.insertData(saveParams);
-	        		if(i>0){
-	        			logger.info("保存客户端软件用户数据成功");
-	        			msbody.append("以为您创建成为客户端软件用户，请注册成为平台译员，并完善客户端软件的相关信息，详情登录官网http");
-	        			result.put("co", "200");
-	        			result.put("ms", msbody);
-	        		}else{
-	        			logger.info("保存客户端软件用户数据失败");
-	        			msbody.append("创建成为客户端软件失败，系统异常");
-	        			result.put("co", "402");
-	        			result.put("ms", msbody);
-	        		}
+        		}else{//创建软件用户信息        			     		
+            		int i = initSoftUser(clientCheckData);//保存软件用户信息   
+            		if(i>0){
+            			logger.info("保存客户端软件用户数据成功");
+            			result.put("co", "200");
+            			result.put("ms", msbody);
+            		}else{
+            			logger.info("保存客户端软件用户数据失败");
+            			msbody.append("创建成为客户端软件用户失败，系统异常");
+            			result.put("co", "400");
+            		}
         		}
-        		//result.put("ds", "客户端用户认证失败-用户名和软件码不存在");
-        		
-        		
-        		
         	}
-           	
+        	//在此添加云翻译信息
+        	List<ClientCloudFormMap> clouds = clientUserSoftInfoMapper.findCloud(2);
+        	List<Map<String,Object>> rclouds = new ArrayList<>();
+        	for(ClientCloudFormMap i:clouds){
+        		Map<String,Object> r = new HashMap<>();
+        		String fileName = i.getStr("fileName");
+        		fileName = fileName.substring(0, fileName.lastIndexOf("."));
+        		r.put("cn",fileName);
+        		BigDecimal price = i.getBigDecimal("price");
+        		String priceStr = "";
+        		if(price!=null){
+        			priceStr = String.valueOf(price);
+        		}
+        		r.put("db", priceStr);
+        		r.put("pfkey", i.getStr("secretKey"));
+        		r.put("pfuc", i.getStr("secretCode"));
+        		rclouds.add(r);
+        	}
+        	result.put("ms", msbody);      
+        	result.put("ct", rclouds);
     	}catch(Exception ex){
     		ex.printStackTrace();
     	}
     	return result;
    	}
     
+    private int initSoftUser(ClientCheckData params){
+    	ClientUserSoftInfoFormMap saveParams = new ClientUserSoftInfoFormMap();
+		saveParams.put("userName", params.getUn());
+		saveParams.put("userCode", params.getUc());
+		saveParams.put("softName", params.getSn());
+		saveParams.put("authTime", new Date());
+		saveParams.put("os", params.getWp());
+		saveParams.put("ip", params.getIp());
+		saveParams.put("licenseLevel", params.getLl());
+		saveParams.put("licenseCode", params.getLc());
+		saveParams.put("licenseTime", params.getLt());
+		saveParams.put("translatePair", params.getTp());  
+		return  clientUserSoftInfoMapper.insertData(saveParams);
+    }
     
     private ClientSoftInfoFormMap queryClient(CloudSimpleData coludDate){
     	Map<String,Object> result = new HashMap<>();
@@ -840,6 +918,7 @@ public class ClientUploadDataController {
 		}
 		return rs;
 	}
+	
 	
 	
 }

@@ -13,7 +13,9 @@
 	</div>
 	<header class="panel-heading">
 	<div class="doc-buttons">
-		<button type="button" id="listPriceFun" class="btn btn-danger marR10">新建云翻译模块</button>
+		<button type="button" id="addFun" class="btn btn-primary marR10">新建云翻译模块</button>
+		<button type="button" id="delFun" class="btn btn-danger marR10">删除云翻译模块</button>	
+		<button type="button" id="uploadFun" class="btn btn-warning marR10">上传云翻译模块数据</button>		
 	</div>
 	</header>
 	<div class="table-responsive">

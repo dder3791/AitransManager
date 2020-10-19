@@ -46,7 +46,8 @@
 			releaseLog,
 			fileType	,
 			dataPath,
-			size	
+			size,
+			fileName	
 		from client_cloud_info		
 	</select>
 	<select id="findCloudSingle" parameterType="com.aiTrans.entity.ClientCloudFormMap" resultType="com.aiTrans.entity.ClientCloudFormMap">
@@ -205,7 +206,10 @@
 			clientId,
 			md5Value,
 			releaseLog,
-			fileType
+			fileType,
+			price,
+			secretKey,
+			secretCode
 		)
 		 values 
 		 (
@@ -217,7 +221,10 @@
 		 	#{clientId},
 		 	#{md5Value},
 		 	#{releaseLog},
-		 	#{fileType}
+		 	#{fileType},
+		 	#{price},
+		 	#{secretKey},
+		 	#{secretCode}
 		 )
 	</insert>
 	<update id="updateCloudData" parameterType="com.aiTrans.entity.ClientCloudFormMap">
@@ -245,4 +252,10 @@
 		and 
 		clientSoftCode=#{clientSoftCode}
 	</select>
+	<delete id="delCloud" parameterType="java.lang.String">
+          DELETE FROM client_cloud_info WHERE id in
+        <foreach collection="array" item="id" open="(" separator="," close=")">
+            #{id}
+        </foreach>
+    </delete>
 </mapper>

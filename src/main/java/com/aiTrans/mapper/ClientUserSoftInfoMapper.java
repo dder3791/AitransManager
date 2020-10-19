@@ -1,5 +1,6 @@
 package com.aiTrans.mapper;
 
+import java.util.List;
 import java.util.Map;
 
 import com.aiTrans.entity.ClientCloudFormMap;
@@ -11,6 +12,6 @@ public interface ClientUserSoftInfoMapper extends BaseMapper{
 	int insertData(ClientUserSoftInfoFormMap params);
 	int updateData(ClientUserSoftInfoFormMap params);
 	Map<String,Object> findTrans(Map<String,Object> params);
-	ClientCloudFormMap findCloud(Integer id);
+	List<ClientCloudFormMap> findCloud(Integer id);
 	
 }

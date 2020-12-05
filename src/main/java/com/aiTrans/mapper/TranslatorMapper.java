@@ -131,4 +131,6 @@ public interface TranslatorMapper extends BaseMapper{
 	public void editTransLanLevDoma(TranslatorFormMap translatorFormMap);
 	
 	public TranslatorFormMap queryById(TranslatorFormMap translatorFormMap);
+	
+	public List<TranslatorFormMap> findTransferSynPage(TranslatorFormMap TranslatorFormMap);
 }

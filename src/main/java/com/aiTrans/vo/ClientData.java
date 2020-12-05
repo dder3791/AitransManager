@@ -11,6 +11,10 @@ public class ClientData {
 	private String dt;
 	private int oc;
 	private int dc;
+	private String bn;
+	private String ua;
+	private String uc;
+	private String op;
 	public String getUn() {
 		return un;
 	}
@@ -70,6 +74,30 @@ public class ClientData {
 	}
 	public void setDc(int dc) {
 		this.dc = dc;
+	}
+	public String getBn() {
+		return bn;
+	}
+	public void setBn(String bn) {
+		this.bn = bn;
+	}
+	public String getUa() {
+		return ua;
+	}
+	public void setUa(String ua) {
+		this.ua = ua;
+	}
+	public String getUc() {
+		return uc;
+	}
+	public void setUc(String uc) {
+		this.uc = uc;
+	}
+	public String getOp() {
+		return op;
+	}
+	public void setOp(String op) {
+		this.op = op;
 	}
 	
 	

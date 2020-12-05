@@ -7,7 +7,28 @@ $(function() {
 		l_column : [  {
 			colkey : "nickname",
 			name : "昵称",
-		}, /*{
+		}, 
+		 {
+			colkey : "realName",
+			name : "姓名",
+		}, 
+		 {
+			colkey : "domain",
+			name : "领域",
+		}, 
+		 {
+			colkey : "languages",
+			name : "语言对",
+		}, 
+		 {
+			colkey : "tranlevels",
+			name : "翻译等级",
+		}
+		
+		
+		
+		
+		/*{
 			colkey : "level",
 			name : "译员等级",
 			isSort:true,
@@ -20,7 +41,7 @@ $(function() {
 					return "五级";
 				}
 			}
-		},*/ {
+		}, {
 			colkey : "degree",
 			name : "学历"
 		}, {
@@ -29,9 +50,9 @@ $(function() {
 		}, {
 			colkey : "domain",
 			name : "翻译领域"
-		}, 
+		}, */
 		 ],
-		jsonUrl : rootPath + '/transfer/find_transfer_by_page.shtml',
+		jsonUrl : rootPath + '/transfer/find_transfer_syn_by_page.shtml',
 		checkbox : true,
 		serNumber : true
 	});

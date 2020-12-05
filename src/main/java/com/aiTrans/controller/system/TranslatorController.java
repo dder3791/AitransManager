@@ -188,7 +188,11 @@ public class TranslatorController extends BaseController {
 		model.addAttribute("language",language);
 		return Common.BACKGROUND_PATH + "/system/transfer/list_transfer";
 	}
-	
+	//转到译员综合列表
+		@RequestMapping("list_transfer_synthetical")
+		public String listTransferSynthetical() throws Exception {			
+			return Common.BACKGROUND_PATH + "/system/transfer/list_transfer_synthetical";
+		}
 	/**
 	 * 跳转  转到校对员审核列表
 	 * 时间：2017\10\9     下午 17:01
@@ -498,7 +502,19 @@ public class TranslatorController extends BaseController {
         pageView.setRecords(translatorMapper.findTransferPage(translatorFormMap));//不调用默认分页,调用自已的mapper中findMemberPage
         return pageView;
 	}
-	
+	//查看综合译员列表
+		@ResponseBody
+		@RequestMapping("find_transfer_syn_by_page")
+		public PageView findTRansferSynPage( String pageNow,
+				String pageSize,String column,String sort) throws Exception {
+			TranslatorFormMap translatorFormMap = getFormMap(TranslatorFormMap.class);
+			translatorFormMap=toFormMap(translatorFormMap, pageNow, pageSize,translatorFormMap.getStr("orderby"));
+			translatorFormMap.put("column",column);
+			translatorFormMap.put("sort",sort);
+			translatorFormMap.put("language", language);			
+	        pageView.setRecords(translatorMapper.findTransferSynPage(translatorFormMap));//不调用默认分页,调用自已的mapper中findMemberPage
+	        return pageView;
+		}
 	
 	//查看校对员列表
 	@ResponseBody

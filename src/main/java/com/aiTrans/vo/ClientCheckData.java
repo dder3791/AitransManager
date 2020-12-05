@@ -11,6 +11,9 @@ public class ClientCheckData {
 	private String lc;	//(软件用户)授权码
 	private String lt;	//(软件用户)授权起始时间
 	private String tp;	//翻译语言对
+	private String bn;//客户端余额
+	private String ua;//未上传费用
+	
 	public String getUn() {
 		return un;
 	}
@@ -70,6 +73,19 @@ public class ClientCheckData {
 	}
 	public void setTp(String tp) {
 		this.tp = tp;
+	}
+	
+	public String getBn() {
+		return bn;
+	}
+	public void setBn(String bn) {
+		this.bn = bn;
+	}
+	public String getUa() {
+		return ua;
+	}
+	public void setUa(String ua) {
+		this.ua = ua;
 	}
 	@Override
 	public String toString() {

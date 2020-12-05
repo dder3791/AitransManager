@@ -80,11 +80,16 @@ public class ClientUploadDataController {
 				Date runTime = DateUtils.parseDate(runtime, new String[]{"yyyy-MM-dd HH:mm:ss","yyyy-MM-dd","yyyyMMdd"});
 				params.put("runtime", runTime);
 			}
-			params.put("userName", clientData.getUn());
-			params.put("softName", clientData.getSn());
+			String un = clientData.getUn();
+        	String uc = clientData.getUc();
+        	String op = clientData.getOp();
+			params.put("userName", un);
+			params.put("softName", uc);
 			params.put("platform", clientData.getCn());
 			params.put("source", clientData.getFr());
 			params.put("target", clientData.getTo());
+			String bn = clientData.getBn();
+        	String ua = clientData.getUa();
 			String original_text = clientData.getOt();
 			String translation_text = clientData.getDt();
 			int original_text_len = original_text.length();
@@ -96,6 +101,63 @@ public class ClientUploadDataController {
 			params.put("originalLen", original_text_len);
 			params.put("translationLen", translation_text_len);
 			int i = clientUploadDataMapper.insertClientUploadData(params);
+			//这里添加对账逻辑，income字段是充值金额
+			Map<String,Object> query = new HashMap<>();
+        	query.put("clientSoftName",un);
+        	query.put("clientSoftCode",uc);
+			Map<String,Object> trans = clientUserSoftInfoMapper.findTrans(query);//查询译员信息
+    		BigDecimal serverBalance = (BigDecimal)trans.get("wallet");
+    		BigDecimal incomeBalance = (BigDecimal)trans.get("income");
+    		BigDecimal clientBalance = new BigDecimal(0);
+    		BigDecimal noUploadBalance = new BigDecimal(0);
+    		BigDecimal transPrice = new BigDecimal(0);
+    		
+    		if(bn!=null){
+    			clientBalance = new BigDecimal(bn);
+    		}
+    		if(ua!=null){
+    			noUploadBalance = new BigDecimal(ua);
+    		}
+    		if(serverBalance==null){
+    			serverBalance = new BigDecimal(0);
+    		}
+    		if(incomeBalance==null){
+    			incomeBalance = new BigDecimal(0);
+    		}                		
+      		if(op!=null){
+      			transPrice = new BigDecimal(op);
+      		}
+    		if(serverBalance.equals(clientBalance.add(noUploadBalance))){
+    			serverBalance = serverBalance.subtract(transPrice);
+    			result.put("bn", serverBalance);
+    			result.put("rc", incomeBalance);
+    			result.put("co", "200");
+        		result.put("ds", "客户端用户认证成功");
+    		}else if((serverBalance.add(incomeBalance)).equals(clientBalance.add(noUploadBalance))){
+    			serverBalance = serverBalance.add(incomeBalance);
+    			result.put("bn", serverBalance);
+    			result.put("rc", incomeBalance);
+    			//exec update sql  .....  ......  ...
+    			result.put("co", "200");
+        		result.put("ds", "客户端用户认证成功");
+    		}else{
+    			serverBalance = serverBalance.add(incomeBalance);
+    			result.put("bn", serverBalance);
+    			result.put("rc", incomeBalance);
+    			result.put("co", "300");
+        		result.put("ds", "客户端用户授权信息验证失败！译员账户余额与客户端不一致！");
+    		}
+    		
+    		result.put("bn", serverBalance.setScale(2));
+    		result.put("rc", incomeBalance.setScale(2));
+    		
+    		
+    		
+    		
+    		
+    			//exec update sql  .....  ......  ...
+    			
+			//cloud ..... balance calc．．．．
 			if(i>0){
 				result.put("co", "200");
 				if(original_text_len!=client_original_text_len){
@@ -654,14 +716,16 @@ public class ClientUploadDataController {
     	try{
         	String un = clientCheckData.getUn();
         	String uc = clientCheckData.getUc();
-        	String sn = clientCheckData.getSn();
-        	String at = clientCheckData.getAt();
-        	String wp = clientCheckData.getWp();
-        	String ip = clientCheckData.getIp();
+        	//String sn = clientCheckData.getSn();
+        	//String at = clientCheckData.getAt();
+        	//String wp = clientCheckData.getWp();
+        	//String ip = clientCheckData.getIp();
         	String ll = clientCheckData.getLl();
         	String lc = clientCheckData.getLc();
         	String lt = clientCheckData.getLt();
-        	String tp = clientCheckData.getTp();
+        	//String tp = clientCheckData.getTp();
+        	String bn = clientCheckData.getBn();
+        	String ua = clientCheckData.getUa();
         	if(StringUtils.isEmpty(un)||StringUtils.isEmpty(uc)){
         		result.put("co", "401");
         		result.put("ds", "客户端用户认证失败-用户名和软件码不能为空");
@@ -689,19 +753,80 @@ public class ClientUploadDataController {
         			}else if(StringUtils.isEmpty(licenseLevel)||StringUtils.isEmpty(licenseCode)||StringUtils.isEmpty(licenseTime)){
         				//服务端没有软件用户的授权信息，通知管理员，更新授权信息
         				logger.info("请管理员添加软件授权信息");
+        				result.put("co", "400");
+                		result.put("ds", "客户端用户授权信息验证失败！请管理员添加软件授权信息");
         				//dosthing....
         			}else if(lc.equals(licenseCode)){//客户端提交的授权信息与服务端一致
         				//}else if(ll.equals(licenseLevel)&&lc.equals(licenseCode)&&lt.equals(licenseTime)){正式环境，请修改为此行......
         				result.put("co", "200");
                 		result.put("ds", "客户端用户认证成功");
-                		msbody.append("译员昵称："+trans.get("nickname")+",译员级别："+trans.get("level")+",账户余额:"+trans.get("wallet")+",");
+                		
+                		//这里添加对账逻辑，income字段是充值金额
+                		BigDecimal serverBalance = (BigDecimal)trans.get("wallet");//2, RoundingMode.HALF_UP
+                		BigDecimal incomeBalance = (BigDecimal)trans.get("income");
+                		BigDecimal clientBalance = new BigDecimal(0);
+                		BigDecimal noUploadBalance = new BigDecimal(0);
+                		
+                		
+                		if(bn!=null){
+                			clientBalance = new BigDecimal(bn);
+                		}
+                		if(ua!=null){
+                			noUploadBalance = new BigDecimal(ua);
+                		}
+                		if(serverBalance==null){
+                			serverBalance = new BigDecimal(0);
+                		}
+                		if(incomeBalance==null){
+                			incomeBalance = new BigDecimal(0);
+                		}                		
+                		if(serverBalance.compareTo(clientBalance.add(noUploadBalance))==0){
+                			result.put("bn", serverBalance);
+                			result.put("rc", incomeBalance);                			
+                		}else if((serverBalance.add(incomeBalance)).compareTo(clientBalance.add(noUploadBalance))==0){
+                			serverBalance = serverBalance.add(incomeBalance);
+                			result.put("bn", serverBalance);
+                			result.put("rc", incomeBalance);
+                			//exec update sql  .....  ......  ...
+                			
+                		}else{
+                			result.put("co", "300");
+                    		result.put("ds", "客户端用户授权信息验证失败！译员账户余额与客户端不一致！");
+                		}
+                		
+                		result.put("bn", serverBalance.setScale(2));
+                		result.put("rc", incomeBalance.setScale(2));
+                		msbody.append("译员昵称："+trans.get("nickname")+",译员级别："+trans.get("level")+",账户余额:"+serverBalance+",");
+                		
+                		//在此添加云翻译信息
+                    	List<ClientCloudFormMap> clouds = clientUserSoftInfoMapper.findCloud(2);
+                    	List<Map<String,Object>> rclouds = new ArrayList<>();
+                    	for(ClientCloudFormMap i:clouds){
+                    		Map<String,Object> r = new HashMap<>();
+                    		String fileName = i.getStr("fileName");
+                    		fileName = fileName.substring(0, fileName.lastIndexOf("."));
+                    		r.put("cn",fileName);
+                    		BigDecimal price = i.getBigDecimal("price");
+                    		String priceStr = "";
+                    		if(price!=null){
+                    			priceStr = String.valueOf(price);
+                    		}
+                    		r.put("db", priceStr);
+                    		r.put("pfkey", i.getStr("secretKey"));
+                    		r.put("pfuc", i.getStr("secretCode"));
+                    		rclouds.add(r);
+                    	}
+                    	result.put("ms", msbody);      
+                    	result.put("ct", rclouds);
+                    	result.put("ll", Common.nullToBlank(licenseLevel));
+            			result.put("lc", Common.nullToBlank(licenseCode));
+            			result.put("lt", Common.nullToBlank(licenseTime));
+                		
         			}else{//客户端提交的授权信息与服务端不一致
         				result.put("co", "400");
                 		result.put("ds", "客户端用户授权信息验证失败！");
         			}
-        			result.put("ll", Common.nullToBlank(licenseLevel));
-        			result.put("lc", Common.nullToBlank(licenseCode));
-        			result.put("lt", Common.nullToBlank(licenseTime));
+        			
         		}else{//该译员不是软件用户，将初始化译员的客户端软件信息
         			int i = initSoftUser(clientCheckData);//保存软件用户信息   
             		if(i>0){
@@ -717,40 +842,26 @@ public class ClientUploadDataController {
         	}else{//没有查到译员信息
         		if(softUser!=null){//该用户已经是是软件用户，引导其注册成为译员
         			msbody.append("您是客户端软件用户，请注册成为平台译员，并完善客户端软件的相关信息，详情登录官网http");
-        			result.put("co", "200");
+        			result.put("co", "400");
+        			result.put("ms", msbody);
+        			result.put("ds", "客户端用户授权信息验证失败！");
         		}else{//创建软件用户信息        			     		
             		int i = initSoftUser(clientCheckData);//保存软件用户信息   
             		if(i>0){
             			logger.info("保存客户端软件用户数据成功");
-            			result.put("co", "200");
-            			result.put("ms", msbody);
+            			result.put("co", "400");
+            			result.put("ms", "已经将您的信息保存，请联系管理员添加或核对软件授权信息");
+            			result.put("ds", "客户端用户授权信息验证失败！");
             		}else{
             			logger.info("保存客户端软件用户数据失败");
             			msbody.append("创建成为客户端软件用户失败，系统异常");
             			result.put("co", "400");
+            			result.put("ds", "客户端用户授权信息验证失败！");
+            			result.put("ms",msbody);
             		}
         		}
         	}
-        	//在此添加云翻译信息
-        	List<ClientCloudFormMap> clouds = clientUserSoftInfoMapper.findCloud(2);
-        	List<Map<String,Object>> rclouds = new ArrayList<>();
-        	for(ClientCloudFormMap i:clouds){
-        		Map<String,Object> r = new HashMap<>();
-        		String fileName = i.getStr("fileName");
-        		fileName = fileName.substring(0, fileName.lastIndexOf("."));
-        		r.put("cn",fileName);
-        		BigDecimal price = i.getBigDecimal("price");
-        		String priceStr = "";
-        		if(price!=null){
-        			priceStr = String.valueOf(price);
-        		}
-        		r.put("db", priceStr);
-        		r.put("pfkey", i.getStr("secretKey"));
-        		r.put("pfuc", i.getStr("secretCode"));
-        		rclouds.add(r);
-        	}
-        	result.put("ms", msbody);      
-        	result.put("ct", rclouds);
+        	
     	}catch(Exception ex){
     		ex.printStackTrace();
     	}
@@ -843,7 +954,7 @@ public class ClientUploadDataController {
                 
             System.out.println(maps);*/
 			
-			List<String> client = new ArrayList<>();
+			/*List<String> client = new ArrayList<>();
 			client.add("A");
 			client.add("B");
 			client.add("C");
@@ -896,8 +1007,33 @@ public class ClientUploadDataController {
 					SSET.add(s);
 				}
 			}
-			System.out.println("服务端独有集:"+SSET);
+			System.out.println("服务端独有集:"+SSET);*/
 			
+			/*BigDecimal a = new BigDecimal(99);
+			BigDecimal b  = a.add(BigDecimal.valueOf(new Long(99l)));
+			System.out.println(b.setScale(2));*/
+			
+			BigDecimal serverBalance = new BigDecimal("22.0000");
+			BigDecimal clientBalance = new BigDecimal(22.0000);
+			//BigDecimal noUploadBalance = new BigDecimal(0);
+			
+			
+			
+			if(serverBalance.compareTo(clientBalance)==0){
+				System.out.println(1);
+			}else{
+				System.out.println(2);
+			}
+				
+			
+			
+			/*System.out.println(serverBalance.add(new BigDecimal("1.00")));
+			
+			if(serverBalance.equals(clientBalance.add(noUploadBalance))){
+				System.out.println(1);
+			}else{
+				System.out.println(0);
+			}*/
 			
 		} catch (Exception e) {
 			
@@ -918,6 +1054,8 @@ public class ClientUploadDataController {
 		}
 		return rs;
 	}
+	
+	
 	
 	
 	

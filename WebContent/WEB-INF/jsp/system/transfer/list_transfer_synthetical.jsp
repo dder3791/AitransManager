@@ -2,12 +2,13 @@
 	pageEncoding="UTF-8"%>
 <%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c"%>
 <script type="text/javascript"
-	src="${pageContext.request.contextPath}/js/system/transfer/list_transfer.js"></script>
+	src="${pageContext.request.contextPath}/js/system/transfer/list_transfer_synthetical.js"></script>
 <div class="m-b-md">
+综合译员列表 
 	<form class="form-inline" role="form" id="searchForm" name="searchForm">
-		<!--<label class="col-xs-2 rowlabel"><b>专业领域</b></label>
+		<label class="col-xs-2 rowlabel"><b>专业领域</b></label>
 		<div class="col-xs-2">
-			 <select class="form-control select_wid" style="width: 100%;" name="translatorFormMap.domain"
+			 <select class="form-control select_wid" style="width: 50%;" name="translatorFormMap.domain"
 				id="domain">
 				<option value="">全部</option>
 				<option value="日常">日常</option>
@@ -29,7 +30,7 @@
 
 		<label class="col-xs-1 rowlabel"><b>选择语对</b></label>
 		<div class="col-xs-2">
-			<select class="form-control" style="width: 100%;" name="translatorFormMap.languages"
+			<select class="form-control" style="width: 50%;" name="translatorFormMap.languages"
 				id="languages">
 				<option value="">全部</option>
 				<option value="汉英">汉英</option>
@@ -46,7 +47,7 @@
 		</div>
 		<label  class="col-xs-2 rowlabel"><b>译员等级</b></label>
 			<div class="col-xs-2">
-				<select class="form-control level" style="width:100%;" name="translatorFormMap.level" id="level">
+				<select class="form-control level" style="width:50%;" name="translatorFormMap.level" id="level">
 			    <option value="">全部</option>
 			    <option value="3">3级</option>
 			    <option value="4">4级</option>
@@ -63,7 +64,7 @@
 				<option value="2">翻译+校对</option>
 				<option value="3">翻译+校对+审核</option>
 			</select>
-		</div> -->
+		</div>
 
 		<div class="form-group">
 			<label class="control-label"> <span

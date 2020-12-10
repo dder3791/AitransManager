@@ -80,10 +80,10 @@
 <input type="hidden" id="language" value="${language }">
 <header class="panel-heading">
 	<div class="doc-buttons">
-		<c:forEach items="${res}" var="key">
-			${key.description}
-		</c:forEach>
-		<button type="button" id="listPriceFun" class="btn btn-danger marR10">报价管理</button>
+		<button type="button" id="showFun" class="btn btn-danger marR10">查看</button>
+		<button type="button" id="addFun" class="btn btn-danger marR10">新增</button>
+		<button type="button" id="editFun" class="btn btn-danger marR10">编辑</button>
+		<button type="button" id="delFun" class="btn btn-danger marR10">删除</button>
 	</div>
 </header>
 <div class="table-responsive">

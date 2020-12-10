@@ -21,4 +21,10 @@ public interface QuotationMapper extends BaseMapper{
 	
 	public int updatePrice(QuotationFormMap quotationFormMap);
 	
+	public int insert(QuotationFormMap quotationFormMap);
+	
+	public int update(QuotationFormMap quotationFormMap);
+	
+	
+	
 }

@@ -502,19 +502,9 @@ public class TranslatorController extends BaseController {
         pageView.setRecords(translatorMapper.findTransferPage(translatorFormMap));//不调用默认分页,调用自已的mapper中findMemberPage
         return pageView;
 	}
-	//查看综合译员列表
-		@ResponseBody
-		@RequestMapping("find_transfer_syn_by_page")
-		public PageView findTRansferSynPage( String pageNow,
-				String pageSize,String column,String sort) throws Exception {
-			TranslatorFormMap translatorFormMap = getFormMap(TranslatorFormMap.class);
-			translatorFormMap=toFormMap(translatorFormMap, pageNow, pageSize,translatorFormMap.getStr("orderby"));
-			translatorFormMap.put("column",column);
-			translatorFormMap.put("sort",sort);
-			translatorFormMap.put("language", language);			
-	        pageView.setRecords(translatorMapper.findTransferSynPage(translatorFormMap));//不调用默认分页,调用自已的mapper中findMemberPage
-	        return pageView;
-		}
+	
+	
+		
 	
 	//查看校对员列表
 	@ResponseBody
@@ -1549,5 +1539,52 @@ public class TranslatorController extends BaseController {
 			System.out.println("编辑报价传来的数据:"+quotationFormMap);
 			int i = quotationMapper.updatePrice(quotationFormMap);
 			return i>0?"success":"failed";
-		}	
+		}
+		/**
+		 * 查看综合译员列表
+		 * shangqiang add 2020-12-5
+		 * @param pageNow
+		 * @param pageSize
+		 * @param column
+		 * @param sort
+		 * @return
+		 * @throws Exception
+		 */
+			@ResponseBody
+			@RequestMapping("find_transfer_syn_by_page")
+			public PageView findTransferSynPage( String pageNow,
+					String pageSize,String column,String sort) throws Exception {
+				TranslatorFormMap translatorFormMap = getFormMap(TranslatorFormMap.class);
+				translatorFormMap=toFormMap(translatorFormMap, pageNow, pageSize,translatorFormMap.getStr("orderby"));
+				translatorFormMap.put("column",column);
+				translatorFormMap.put("sort",sort);
+				translatorFormMap.put("language", language);			
+		        pageView.setRecords(translatorMapper.findTransferSynPage(translatorFormMap));//不调用默认分页,调用自已的mapper中findMemberPage
+		        return pageView;
+			}
+			/**
+			 * 查询综合译员详情
+			 * @param model
+			 * @return
+			 * @throws Exception
+			 */
+			@RequestMapping("show_transfer_syn")
+			public String showTransferSyn(Model model)throws Exception{
+				String rs = null;
+				try{
+					String id = getPara("qid");
+					if(id!=null){
+						System.out.println("==========================transfer qid:"+id);
+						Integer qid = Integer.valueOf(id);
+						TranslatorFormMap transfer = translatorMapper.findTransferSynDesc(qid);
+						model.addAttribute("transfer", transfer);
+						System.out.println("==========================transfer:"+transfer);
+						rs = Common.BACKGROUND_PATH + "/system/transfer/show_transfer_syn";
+					}
+				}catch(Exception ex){
+					ex.printStackTrace();
+				}
+				return rs;
+				
+			}
 }

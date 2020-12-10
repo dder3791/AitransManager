@@ -124,14 +124,32 @@
 	</select>
 	<!-- 综合译员分页查询 -->
 	<select id="findTransferSynPage" resultType="com.aiTrans.entity.TranslatorFormMap">
-		select t.realName,t.nickname,q.* from translatorD as t,quotationD as q where t.id=q.transtionId
+		select q.id,t.realName,t.nickname,q.languages,q.tranlevels,q.proolevels,q.auditlevels,q.domain from translatorD as t,quotationD as q where t.id=q.transtionId
 		<if test="domain != null and domain != ''">
 		and q.domain like '%${domain}%'
 		</if>
 		<if test="languages != null and languages != ''">
 		and q.languages like '%${languages}%'
 		</if>
+		<if test="proof != null and proof != '' and level !=null and level !=''">
+			<choose>
+		   	 	<when test="proof==2">
+		          and q.proolevels=${level} 
+		        </when>
+		        <when test="proof==3">
+		          and q.auditlevels=${level} 
+		        </when>
+		        <otherwise>
+		          and q.tranlevels=${level} 
+		        </otherwise>
+		      </choose>
+		</if>
 		
+	</select>
+	<!-- 综合译员详情查询 -->
+	<select id="findTransferSynDesc" parameterType="java.lang.Integer" resultType="com.aiTrans.entity.TranslatorFormMap">
+		select t.realName,t.nickname,q.*  from translatorD as t,quotationD as q where t.id=q.transtionId
+		and q.id=#{qid}		
 	</select>
 	<!-- 校对员分页查找 -->
 	<select id="findProofreaderPage" resultType="com.aiTrans.entity.TranslatorFormMap" parameterType="com.aiTrans.entity.TranslatorFormMap">

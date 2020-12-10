@@ -133,4 +133,6 @@ public interface TranslatorMapper extends BaseMapper{
 	public TranslatorFormMap queryById(TranslatorFormMap translatorFormMap);
 	
 	public List<TranslatorFormMap> findTransferSynPage(TranslatorFormMap TranslatorFormMap);
+	
+	public TranslatorFormMap findTransferSynDesc(@Param("qid") Integer qid);
 }

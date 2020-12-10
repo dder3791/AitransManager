@@ -63,4 +63,90 @@
 		</trim>
 		where id=#{id} 
 	</update>
+	<insert id="insert" parameterType="com.aiTrans.entity.QuotationFormMap" >
+		insert into quotationD  (id,tranPrice,prooPrice,dayTrans,majorTotal,prooTotal,transtionId,languages,worksTarget,worksOrigin,domain,auditPrice,auditTotal,tranlevels,proolevels,auditlevels,applyStateT,tranReason,prooReason,auditReason,applyStateP,applyStateA,dayProo,dayAudit,wantTranPrice,wantProoPrice,wantAuditPrice)
+		values(#{tranPrice},#{prooPrice},#{dayTrans},#{majorTotal},#{prooTotal},#{transtionId},#{languages},#{worksTarget},#{worksOrigin},#{domain},#{auditPrice},#{auditTotal},#{tranlevels},#{proolevels},#{auditlevels},#{applyStateT},#{tranReason},#{prooReason},#{auditReason},#{applyStateP},#{applyStateA},#{dayProo},#{dayAudit},#{wantTranPrice},#{wantProoPrice},#{wantAuditPrice})
+	</insert>
+	<update id="update" parameterType="com.aiTrans.entity.QuotationFormMap">
+		update quotationD 
+		<trim prefix="set" suffixOverrides=",">
+			<if test="tranPrice!=null and tranPrice!=''">
+				tranPrice=#{tranPrice},
+			</if>
+			<if test="prooPrice!=null and prooPrice!=''">
+				prooPrice=#{prooPrice},
+			</if>
+			<if test="dayTrans!=null and dayTrans!=''">
+				dayTrans=#{dayTrans},
+			</if>
+			<if test="languages!=null and languages!=''">
+				languages=#{languages},
+			</if>
+			<if test="majorTotal!=null and majorTotal!=''">
+				majorTotal=#{majorTotal},
+			</if>
+			<if test="prooTotal!=null and prooTotal!=''">
+				prooTotal=#{prooTotal},
+			</if>
+			<if test="worksTarget!=null and worksTarget!=''">
+				worksTarget=#{worksTarget},
+			</if>
+			<if test="worksOrigin!=null and worksOrigin!=''">
+				worksOrigin=#{worksOrigin},
+			</if>
+			<if test="domain!=null and domain!=''">
+				domain=#{domain},
+			</if>
+			<if test="auditPrice!=null and auditPrice!=''">
+				auditPrice=#{auditPrice},
+			</if>
+			<if test="auditTotal!=null and auditTotal!=''">
+				auditTotal=#{auditTotal},
+			</if>			
+			<if test="tranlevels!=null and tranlevels!=''">
+				tranlevels=#{tranlevels},
+			</if>
+			<if test="proolevels!=null and proolevels!=''">
+				proolevels=#{proolevels},
+			</if>
+			<if test="auditlevels!=null and auditlevels!=''">
+				auditlevels=#{auditlevels},
+			</if>
+			<if test="applyStateT!=null and applyStateT!=''">
+				applyStateT=#{applyStateT},
+			</if>
+			<if test="tranReason!=null and tranReason!=''">
+				tranReason=#{tranReason},
+			</if>
+			<if test="prooReason!=null and prooReason!=''">
+				prooReason=#{prooReason},
+			</if>
+			<if test="auditReason!=null and auditReason!=''">
+				auditReason=#{auditReason},
+			</if>
+			<if test="applyStateP!=null and applyStateP!=''">
+				applyStateP=#{applyStateP},
+			</if>
+			<if test="applyStateA!=null and applyStateA!=''">
+				applyStateA=#{applyStateA},
+			</if>
+			<if test="dayProo!=null and dayProo!=''">
+				dayProo=#{dayProo},
+			</if>
+			<if test="dayAudit!=null and dayAudit!=''">
+				dayAudit=#{dayAudit},
+			</if>
+			<if test="wantTranPrice!=null and wantTranPrice!=''">
+				wantTranPrice=#{wantTranPrice},
+			</if>
+			<if test="wantProoPrice!=null and wantProoPrice!=''">
+				wantProoPrice=#{wantProoPrice},
+			</if>
+			<if test="wantAuditPrice!=null and wantAuditPrice!=''">
+				wantAuditPrice=#{wantAuditPrice},
+			</if>
+			
+		</trim>
+		where id=#{id} 
+	</update>
 </mapper>

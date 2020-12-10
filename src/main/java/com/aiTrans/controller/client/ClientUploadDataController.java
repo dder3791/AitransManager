@@ -100,7 +100,7 @@ public class ClientUploadDataController {
 			params.put("translation", translation_text);//统计字数dc
 			params.put("originalLen", original_text_len);
 			params.put("translationLen", translation_text_len);
-			int i = clientUploadDataMapper.insertClientUploadData(params);
+			
 			//这里添加对账逻辑，income字段是充值金额
 			Map<String,Object> query = new HashMap<>();
         	query.put("clientSoftName",un);
@@ -135,6 +135,7 @@ public class ClientUploadDataController {
         		result.put("ds", "客户端用户认证成功");
     		}else if((serverBalance.add(incomeBalance)).equals(clientBalance.add(noUploadBalance))){
     			serverBalance = serverBalance.add(incomeBalance);
+    			serverBalance = serverBalance.subtract(transPrice);
     			result.put("bn", serverBalance);
     			result.put("rc", incomeBalance);
     			//exec update sql  .....  ......  ...
@@ -142,14 +143,15 @@ public class ClientUploadDataController {
         		result.put("ds", "客户端用户认证成功");
     		}else{
     			serverBalance = serverBalance.add(incomeBalance);
+    			serverBalance = serverBalance.subtract(transPrice);
     			result.put("bn", serverBalance);
     			result.put("rc", incomeBalance);
     			result.put("co", "300");
         		result.put("ds", "客户端用户授权信息验证失败！译员账户余额与客户端不一致！");
     		}
-    		
-    		result.put("bn", serverBalance.setScale(2));
-    		result.put("rc", incomeBalance.setScale(2));
+    		int i = clientUploadDataMapper.insertClientUploadData(params);//加上本次翻译费用
+    		result.put("bn", String.valueOf(serverBalance.setScale(2)));
+    		result.put("rc", String.valueOf(incomeBalance.setScale(2)));
     		
     		
     		
@@ -845,7 +847,7 @@ public class ClientUploadDataController {
         			result.put("co", "400");
         			result.put("ms", msbody);
         			result.put("ds", "客户端用户授权信息验证失败！");
-        		}else{//创建软件用户信息        			     		
+        		}else{//创建软件用户信息
             		int i = initSoftUser(clientCheckData);//保存软件用户信息   
             		if(i>0){
             			logger.info("保存客户端软件用户数据成功");

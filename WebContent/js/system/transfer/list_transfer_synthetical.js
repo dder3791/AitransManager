@@ -24,6 +24,16 @@ $(function() {
 			colkey : "tranlevels",
 			name : "翻译等级",
 		}
+		, 
+		 {
+			colkey : "proolevels",
+			name : "翻译+校对等级",
+		}
+		, 
+		 {
+			colkey : "auditlevels",
+			name : "翻译+校对+审核等级",
+		}
 		
 		
 		
@@ -71,8 +81,8 @@ $(function() {
 	$("#delFun").click("click", function() {
 		delAccount();
 	});
-	$("#look").click("click", function() {
-		look();
+	$("#showFun").click("click", function() {
+		show();
 	});
 	$("#listPriceFun").click("click", function() {
 		listPriceFun();
@@ -119,13 +129,13 @@ function delAccount() {
 		}
 	});
 }
-function look() {
+function show() {
 	var cbox = grid.getSelectedCheckbox();
 	if (cbox.length > 1 || cbox == "") {
 		layer.msg("请选择一个对象！");
 		return;
 	}
-	var url = rootPath + '/transfer/look_transfer.shtml?translatorId='+cbox;
+	var url = rootPath + '/transfer/show_transfer_syn.shtml?qid='+cbox;
 	pageii = layer.open({
 		title : "查看详情",
 		type : 2,

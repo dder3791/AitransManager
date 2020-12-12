@@ -125,6 +125,9 @@
 	<!-- 综合译员分页查询 -->
 	<select id="findTransferSynPage" resultType="com.aiTrans.entity.TranslatorFormMap">
 		select q.id,t.realName,t.nickname,q.languages,q.tranlevels,q.proolevels,q.auditlevels,q.domain from translatorD as t,quotationD as q where t.id=q.transtionId
+		<if test="nickname != null and nickname != ''">
+		and nickname like '%${nickname}%'
+		</if>
 		<if test="domain != null and domain != ''">
 		and q.domain like '%${domain}%'
 		</if>

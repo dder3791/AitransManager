@@ -163,10 +163,12 @@ public class ClientUploadDataController {
 			if(i>0){
 				result.put("co", "200");
 				if(original_text_len!=client_original_text_len){
-					result.put("oc", original_text_len);
+					//result.put("oc", original_text_len);//统计功能尚未完善
+					result.put("oc", client_original_text_len);
 				}
 				if(translation_text_len!=client_translation_text_len){
-					result.put("dc", translation_text_len);
+					//result.put("dc", translation_text_len);//统计功能尚未完善
+					result.put("dc", client_translation_text_len);
 				}				
 			}else{
 				result.put("co", "300");

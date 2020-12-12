@@ -98,7 +98,7 @@ function editFun() {
 		title : "编辑",
 		type : 2,
 		area : [ "600px", "80%" ],
-		content : rootPath + '/transfer/editUI.shtml?id=' + cbox
+		content : rootPath + '/quotation/toedit.shtml?id=' + cbox
 	});
 }
 function addFun() {

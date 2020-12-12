@@ -13,7 +13,10 @@ import org.springframework.web.context.request.ServletRequestAttributes;
 
 import com.aiTrans.controller.index.BaseController;
 import com.aiTrans.entity.QuotationFormMap;
+import com.aiTrans.entity.TranslatorFormMap;
 import com.aiTrans.mapper.QuotationMapper;
+import com.aiTrans.mapper.TranslatorMapper;
+import com.aiTrans.util.Common;
 
 @Controller
 @RequestMapping("/quotation/")
@@ -21,6 +24,8 @@ public class QuotationController extends BaseController{
 
 	@Inject
 	private QuotationMapper quotationMapper;
+	@Inject
+	private TranslatorMapper translatorMapper;
 	
 	public String getPara(String key){
 		HttpServletRequest request = ((ServletRequestAttributes)RequestContextHolder.getRequestAttributes()).getRequest();  
@@ -48,14 +53,29 @@ public class QuotationController extends BaseController{
 		int i = quotationMapper.insert(quotationFormMap);
 		return i>0?"success":"failed";
 	}
+	
+	@RequestMapping("toedit")
+	public String toEdit(Model model)throws Exception{
+		String id = getPara("id");
+		System.out.println("================id:"+id);
+		Integer qid = null;
+		//QuotationFormMap quotationFormMap = getFormMap(QuotationFormMap.class);
+		if(!StringUtils.isEmpty(id)){
+			qid = Integer.valueOf(id);
+		}
+		System.out.println("================qid:"+qid);
+		TranslatorFormMap trans = translatorMapper.findTransferSynDesc(qid);
+		model.addAttribute("transfer", trans);		
+		return Common.BACKGROUND_PATH + "/system/quotation/edit";
+	}
 	@ResponseBody
 	@RequestMapping("edit")
 	public String edit()throws Exception{
 		QuotationFormMap quotationFormMap = getFormMap(QuotationFormMap.class);
-		Integer id = quotationFormMap.getInt("id");
+		String id = quotationFormMap.getStr("id");
 		if(StringUtils.isEmpty(id)){
 			return "failed";
-		}
+		}		
 		int i = quotationMapper.update(quotationFormMap);
 		return i>0?"success":"failed";
 	}
